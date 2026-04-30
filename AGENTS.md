@@ -453,6 +453,7 @@ El frontend se desarrollara con:
 - JavaScript.
 - JSX.
 - npm.
+- Axios.
 - Vitest.
 - React Testing Library.
 - Playwright para tests E2E.
@@ -502,6 +503,37 @@ No se deben crear carpetas alternativas para resolver problemas que ya tienen un
 ## 18. Frontend - Comunicacion con API
 
 Todas las llamadas al backend deben centralizarse en `/src/api/`.
+
+El frontend usara Axios como cliente HTTP para comunicarse con el backend.
+
+La configuracion base de Axios debe centralizarse en:
+
+```text
+src/api/apiClient.js
+```
+
+Ese archivo debe configurar:
+
+- `baseURL` usando `VITE_API_BASE_URL`.
+- Headers comunes si son necesarios.
+- Manejo basico de errores.
+- Exportacion de una instancia reutilizable de Axios.
+
+No se deben crear instancias de Axios duplicadas en distintos archivos.
+
+Los servicios API de cada dominio deben reutilizar `apiClient`.
+
+Estructura recomendada:
+
+```text
+src/api/apiClient.js
+src/api/userApi.js
+src/api/hotelApi.js
+src/api/attractionApi.js
+src/api/employeeApi.js
+src/api/bookingApi.js
+src/api/dashboardApi.js
+```
 
 No se deben hacer llamadas directas a la API dentro de componentes JSX.
 
