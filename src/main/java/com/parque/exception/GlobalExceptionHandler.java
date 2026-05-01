@@ -54,12 +54,28 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.CONFLICT, "Conflict", request.getRequestURI());
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
+            IllegalArgumentException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request.getRequestURI());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiErrorResponse> handleUnexpected(
             Exception ex,
             HttpServletRequest request
     ) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Unexpected error", request.getRequestURI());
+    }
+
+    @ExceptionHandler(InternalServerErrorException.class)
+    public ResponseEntity<ApiErrorResponse> handleInternalServer(
+            InternalServerErrorException ex,
+            HttpServletRequest request
+    ) {
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request.getRequestURI());
     }
 
     private ResponseEntity<ApiErrorResponse> buildErrorResponse(HttpStatus status, String message, String path) {
@@ -85,6 +101,12 @@ public class GlobalExceptionHandler {
         }
         if (path != null && path.startsWith("/api/employees")) {
             return "Invalid employee data";
+        }
+        if (path != null && path.startsWith("/api/shifts")) {
+            return "Invalid request data";
+        }
+        if (path != null && path.startsWith("/api/maintenance")) {
+            return "Invalid request data";
         }
         return "Invalid request data";
     }
