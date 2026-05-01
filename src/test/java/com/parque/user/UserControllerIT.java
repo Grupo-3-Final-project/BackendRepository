@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -16,6 +15,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
 
@@ -24,9 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Transactional
 class UserControllerIT {
-
-    @Autowired
-    private TestRestTemplate restTemplate;
 
     @LocalServerPort
     private int port;
@@ -125,7 +122,11 @@ class UserControllerIT {
 
     @Test
     void getUser_shouldReturn404WithApiError_whenNotFound() throws Exception {
-        ResponseEntity<String> response = restTemplate.getForEntity(url("/api/users/999"), String.class);
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/users/999")
+                .retrieve()
+                .toEntity(String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         JsonNode body = objectMapper.readTree(response.getBody());
@@ -138,7 +139,11 @@ class UserControllerIT {
 
     @Test
     void deleteUser_shouldReturn404_whenNotFound() throws Exception {
-        ResponseEntity<String> response = restTemplate.exchange(url("/api/users/999"), HttpMethod.DELETE, HttpEntity.EMPTY, String.class);
+        ResponseEntity<String> response = restClient()
+                .method(HttpMethod.DELETE)
+                .uri("/api/users/999")
+                .retrieve()
+                .toEntity(String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         JsonNode body = objectMapper.readTree(response.getBody());
@@ -148,10 +153,20 @@ class UserControllerIT {
     private ResponseEntity<String> postJson(String path, String body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
-        return restTemplate.postForEntity(url(path), new HttpEntity<>(body, headers), String.class);
+        return restClient()
+                .post()
+                .uri(path)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .body(body)
+                .retrieve()
+                .toEntity(String.class);
     }
 
     private String url(String path) {
         return "http://localhost:" + port + path;
+    }
+
+    private RestClient restClient() {
+        return RestClient.builder().baseUrl("http://localhost:" + port).build();
     }
 }
