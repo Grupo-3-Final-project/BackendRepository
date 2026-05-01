@@ -77,6 +77,9 @@ public class GlobalExceptionHandler {
         if (path != null && path.startsWith("/api/users")) {
             return "Invalid user data";
         }
+        if (path != null && path.startsWith("/api/hotels")) {
+            return "Invalid hotel data";
+        }
         return "Invalid request data";
     }
 }
