@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Entity
 @Table(name = "bookings")
@@ -32,7 +33,7 @@ public class Booking {
 
     @ManyToOne
     @JoinColumn(name = "offer_id")
-    private Object offer;
+    private Offer offer;
 
     @ManyToOne
     @JoinColumn(name = "hotel_id")
@@ -56,4 +57,7 @@ public class Booking {
 
     @CreationTimestamp
     private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 }

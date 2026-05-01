@@ -7,16 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "hotels")
+@Table(name = "attractions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Hotel {
+public class Attraction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,36 +27,27 @@ public class Hotel {
     @NotBlank
     private String description;
 
+    @NotBlank
+    private String size;
+
+    @NotBlank
+    private String status;
+
     @NotNull
     @Positive
-    private Integer totalRooms;
+    private Integer totalSeats;
 
     @NotNull
     @PositiveOrZero
-    private Integer availableRooms;
+    private Integer availableSeats;
 
     @NotNull
     @Positive
-    private Integer totalPlaces;
-
-    @NotNull
-    @PositiveOrZero
-    private Integer availablePlaces;
-
-    @NotNull
-    @Positive
-    private BigDecimal halfBoardPrice;
-
-    @NotNull
-    @Positive
-    private BigDecimal fullBoardPrice;
+    private Integer maintenanceFrequencyDays;
 
     @NotBlank
     private String imageUrl;
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE)
-    private List<Booking> bookings;
-
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE)
-    private List<Offer> offers;
+    @OneToMany(mappedBy = "attraction", cascade = CascadeType.REMOVE)
+    private List<Maintenance> maintenances;
 }

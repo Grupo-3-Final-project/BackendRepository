@@ -6,20 +6,16 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "users")
+@Table(name = "employees")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User {
+public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,19 +39,18 @@ public class User {
     @Column(unique = true)
     private String email;
 
-    @Pattern(regexp = "^[0-9]{9,}$")
-    private String phone;
+    @NotBlank
+    private String employeeType;
+
+    @NotBlank
+    private String shift;
 
     @NotNull
-    @PastOrPresent
-    private LocalDate birthDate;
+    private Boolean active;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.REMOVE)
+    private List<Shift> shifts;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
-    private List<Booking> bookings;
+    @ManyToMany(mappedBy = "technicians")
+    private List<Maintenance> maintenances;
 }

@@ -7,15 +7,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Entity
-@Table(name = "tickets")
+@Table(name = "shifts")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Ticket {
+public class Shift {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,17 +23,15 @@ public class Ticket {
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "booking_id", nullable = false)
-    private Booking booking;
+    @JoinColumn(name = "employee_id", nullable = false)
+    private Employee employee;
 
     @NotBlank
-    private String holderFullName;
-
-    @NotBlank
-    @Pattern(regexp = "^(CHILD|ADULT|SENIOR)$")
-    private String ageRange;
+    private String shift;
 
     @NotNull
-    @Positive
-    private BigDecimal price;
+    private LocalDate startDate;
+
+    @NotNull
+    private LocalDate endDate;
 }

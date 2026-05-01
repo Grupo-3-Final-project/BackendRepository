@@ -11,53 +11,42 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
-@Table(name = "hotels")
+@Table(name = "offers")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Hotel {
+public class Offer {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    private String name;
+    private String title;
 
     @NotBlank
     private String description;
 
     @NotNull
-    @Positive
-    private Integer totalRooms;
+    @ManyToOne
+    @JoinColumn(name = "hotel_id", nullable = false)
+    private Hotel hotel;
 
-    @NotNull
-    @PositiveOrZero
-    private Integer availableRooms;
-
-    @NotNull
-    @Positive
-    private Integer totalPlaces;
-
-    @NotNull
-    @PositiveOrZero
-    private Integer availablePlaces;
+    @NotBlank
+    private String boardType;
 
     @NotNull
     @Positive
-    private BigDecimal halfBoardPrice;
+    private Integer includedTickets;
 
     @NotNull
     @Positive
-    private BigDecimal fullBoardPrice;
+    private BigDecimal totalPrice;
 
     @NotBlank
     private String imageUrl;
 
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "offer", cascade = CascadeType.REMOVE)
     private List<Booking> bookings;
-
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.REMOVE)
-    private List<Offer> offers;
 }
