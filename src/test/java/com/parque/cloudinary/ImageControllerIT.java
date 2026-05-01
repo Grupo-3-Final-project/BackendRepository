@@ -2,15 +2,18 @@ package com.parque.cloudinary;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parque.testconfig.JacksonTestConfig;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClient;
@@ -18,7 +21,8 @@ import org.springframework.web.client.RestClient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Transactional
+@Import(JacksonTestConfig.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class ImageControllerIT {
 
     @LocalServerPort
@@ -31,6 +35,12 @@ class ImageControllerIT {
     void upload_shouldReturn400_whenInvalidFile() throws Exception {
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
         body.add("folder", "hotels");
+        body.add("file", new ByteArrayResource("x".getBytes()) {
+            @Override
+            public String getFilename() {
+                return "test.txt";
+            }
+        });
 
         ResponseEntity<String> response = restClient()
                 .post()
@@ -70,7 +80,10 @@ class ImageControllerIT {
     }
 
     private RestClient restClient() {
-        return RestClient.builder().baseUrl("http://localhost:" + port).build();
+        return RestClient.builder()
+                .baseUrl("http://localhost:" + port)
+                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
+                })
+                .build();
     }
 }
-
