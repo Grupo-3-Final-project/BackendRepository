@@ -2,6 +2,7 @@ package com.parque.hotel;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parque.testconfig.JacksonTestConfig;
 import com.parque.hotel.dto.HotelCreateRequest;
 import com.parque.hotel.dto.HotelUpdateRequest;
 import com.parque.hotel.repository.HotelRepository;
@@ -10,12 +11,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
@@ -24,7 +27,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Transactional
+@Import(JacksonTestConfig.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class HotelControllerIT {
 
     @LocalServerPort
@@ -234,6 +238,10 @@ class HotelControllerIT {
     }
 
     private RestClient restClient() {
-        return RestClient.builder().baseUrl("http://localhost:" + port).build();
+        return RestClient.builder()
+                .baseUrl("http://localhost:" + port)
+                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
+                })
+                .build();
     }
 }
