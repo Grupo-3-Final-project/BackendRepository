@@ -44,14 +44,14 @@ public class AuthController {
                     .body(new ErrorResponse("Invalid username or password", "INVALID_CREDENTIALS"));
             }
 
-            // Generate JWT token
-            String token = jwtProvider.generateToken(user.getId(), user.getUsername());
+            // Generate JWT token (using email as username)
+            String token = jwtProvider.generateToken(user.id(), user.email());
 
             LoginResponse response = LoginResponse.of(
                 token,
-                user.getId(),
-                user.getUsername(),
-                user.getEmail()
+                user.id(),
+                user.email(),
+                user.email()
             );
 
             return ResponseEntity.ok(response);
