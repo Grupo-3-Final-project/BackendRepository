@@ -36,6 +36,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public UserResponse getByUsername(String username) {
+        // Using email as username
+        User user = userRepository.findByEmail(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
+        return toResponse(user);
+    }
+
+    @Override
     public UserResponse create(UserCreateRequest request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new ConflictException("Email already exists");
