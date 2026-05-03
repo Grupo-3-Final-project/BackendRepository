@@ -1,5 +1,6 @@
 package com.parque.employee.dto;
 
+import com.parque.validation.AllowedValues;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -20,8 +21,10 @@ public record EmployeeUpdateRequest(
         @Email
         String email,
         @NotBlank
+        @AllowedValues({"CLEANER", "ANIMATOR", "TECHNICIAN"})
         String employeeType,
         @NotBlank
+        @AllowedValues({"MORNING", "AFTERNOON"})
         String shift,
         @NotNull
         Boolean active

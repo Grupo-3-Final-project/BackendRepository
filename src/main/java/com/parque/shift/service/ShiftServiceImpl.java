@@ -94,7 +94,10 @@ public class ShiftServiceImpl implements ShiftService {
                 .toList();
 
         Map<String, Long> countsByType = activeEmployees.stream()
-                .collect(java.util.stream.Collectors.groupingBy(Employee::getEmployeeType, java.util.stream.Collectors.counting()));
+                .collect(java.util.stream.Collectors.groupingBy(
+                        employee -> employee.getEmployeeType() == null ? "" : employee.getEmployeeType().trim().toUpperCase(),
+                        java.util.stream.Collectors.counting()
+                ));
 
         List<String> requiredTypes = List.of("CLEANER", "ANIMATOR", "TECHNICIAN");
         boolean enough = requiredTypes.stream().allMatch(type -> countsByType.getOrDefault(type, 0L) >= 3L);

@@ -45,13 +45,16 @@ public class EmployeeServiceImpl implements EmployeeService {
             throw new ConflictException("DNI already exists");
         }
 
+        String employeeType = normalize(request.employeeType());
+        String shift = normalize(request.shift());
+
         Employee employee = Employee.builder()
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .dni(request.dni())
                 .email(request.email())
-                .employeeType(request.employeeType())
-                .shift(request.shift())
+                .employeeType(employeeType)
+                .shift(shift)
                 .active(request.active())
                 .build();
 
@@ -75,12 +78,15 @@ public class EmployeeServiceImpl implements EmployeeService {
                     throw new ConflictException("DNI already exists");
                 });
 
+        String employeeType = normalize(request.employeeType());
+        String shift = normalize(request.shift());
+
         employee.setFirstName(request.firstName());
         employee.setLastName(request.lastName());
         employee.setDni(request.dni());
         employee.setEmail(request.email());
-        employee.setEmployeeType(request.employeeType());
-        employee.setShift(request.shift());
+        employee.setEmployeeType(employeeType);
+        employee.setShift(shift);
         employee.setActive(request.active());
 
         return toResponse(employeeRepository.save(employee));
@@ -105,6 +111,10 @@ public class EmployeeServiceImpl implements EmployeeService {
                 employee.getShift(),
                 employee.getActive()
         );
+    }
+
+    private String normalize(String value) {
+        return value.trim().toUpperCase();
     }
 }
 

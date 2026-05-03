@@ -42,11 +42,13 @@ public class OfferServiceImpl implements OfferService {
         Hotel hotel = hotelRepository.findById(request.hotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found"));
 
+        String boardType = request.boardType().trim().toUpperCase();
+
         Offer offer = Offer.builder()
                 .title(request.title())
                 .description(request.description())
                 .hotel(hotel)
-                .boardType(request.boardType())
+                .boardType(boardType)
                 .includedTickets(request.includedTickets())
                 .totalPrice(request.totalPrice())
                 .imageUrl(request.imageUrl())

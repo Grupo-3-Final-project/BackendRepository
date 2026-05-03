@@ -1,5 +1,6 @@
 package com.parque.booking.dto;
 
+import com.parque.validation.AllowedValues;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -18,6 +19,7 @@ public record BookingCreateRequest(
         @Positive
         Long hotelId,
         @NotBlank
+        @AllowedValues({"HALF_BOARD", "FULL_BOARD"})
         String boardType,
         @NotNull
         LocalDate visitDate,

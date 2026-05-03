@@ -37,13 +37,15 @@ public class AttractionServiceImpl implements AttractionService {
 
     @Override
     public AttractionResponse create(AttractionCreateRequest request) {
-        int maintenanceFrequencyDays = calculateMaintenanceFrequencyDays(request.size());
+        String size = normalize(request.size());
+        String status = normalize(request.status());
+        int maintenanceFrequencyDays = calculateMaintenanceFrequencyDays(size);
 
         Attraction attraction = Attraction.builder()
                 .name(request.name())
                 .description(request.description())
-                .size(request.size())
-                .status(request.status())
+                .size(size)
+                .status(status)
                 .totalSeats(request.totalSeats())
                 .availableSeats(request.availableSeats())
                 .maintenanceFrequencyDays(maintenanceFrequencyDays)
@@ -58,12 +60,14 @@ public class AttractionServiceImpl implements AttractionService {
         Attraction attraction = attractionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Attraction not found"));
 
-        int maintenanceFrequencyDays = calculateMaintenanceFrequencyDays(request.size());
+        String size = normalize(request.size());
+        String status = normalize(request.status());
+        int maintenanceFrequencyDays = calculateMaintenanceFrequencyDays(size);
 
         attraction.setName(request.name());
         attraction.setDescription(request.description());
-        attraction.setSize(request.size());
-        attraction.setStatus(request.status());
+        attraction.setSize(size);
+        attraction.setStatus(status);
         attraction.setTotalSeats(request.totalSeats());
         attraction.setAvailableSeats(request.availableSeats());
         attraction.setMaintenanceFrequencyDays(maintenanceFrequencyDays);
@@ -89,6 +93,10 @@ public class AttractionServiceImpl implements AttractionService {
             case "SMALL" -> 30;
             default -> 14;
         };
+    }
+
+    private String normalize(String value) {
+        return value.trim().toUpperCase();
     }
 
     private AttractionResponse toResponse(Attraction attraction) {
