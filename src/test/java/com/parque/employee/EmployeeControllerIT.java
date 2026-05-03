@@ -171,6 +171,28 @@ class EmployeeControllerIT {
     }
 
     @Test
+    void postEmployees_shouldReturn400WithApiError_whenEnumValueIsInvalid() throws Exception {
+        String invalidBody = """
+                {
+                  "firstName": "Laura",
+                  "lastName": "Gomez",
+                  "dni": "87654321B",
+                  "email": "laura@example.com",
+                  "employeeType": "MANAGER",
+                  "shift": "NIGHT",
+                  "active": true
+                }
+                """;
+
+        ResponseEntity<String> response = postJson("/api/employees", invalidBody);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("message").asText()).isEqualTo("Invalid employee data");
+        assertThat(body.get("path").asText()).isEqualTo("/api/employees");
+    }
+
+    @Test
     void postEmployees_shouldReturn409WithApiError_whenDuplicateEmail() throws Exception {
         EmployeeCreateRequest first = new EmployeeCreateRequest(
                 "Laura",

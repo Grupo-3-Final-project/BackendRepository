@@ -172,6 +172,28 @@ class AttractionControllerIT {
     }
 
     @Test
+    void postAttractions_shouldReturn400WithApiError_whenEnumValueIsInvalid() throws Exception {
+        String invalidBody = """
+                {
+                  "name": "Dragon Coaster",
+                  "description": "Montana rusa principal del parque.",
+                  "size": "HUGE",
+                  "status": "BROKEN",
+                  "totalSeats": 32,
+                  "availableSeats": 20,
+                  "imageUrl": "https://example.com/attraction.jpg"
+                }
+                """;
+
+        ResponseEntity<String> response = postJson("/api/attractions", invalidBody);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("message").asText()).isEqualTo("Invalid attraction data");
+        assertThat(body.get("path").asText()).isEqualTo("/api/attractions");
+    }
+
+    @Test
     void getAttraction_shouldReturn404WithApiError_whenNotFound() throws Exception {
         ResponseEntity<String> response = restClient()
                 .get()

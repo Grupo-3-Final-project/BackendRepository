@@ -143,6 +143,34 @@ class BookingControllerIT {
     }
 
     @Test
+    void postBookings_shouldReturn400WithApiError_whenBoardTypeIsInvalid() throws Exception {
+        User user = saveUser("david@example.com", "12345678A");
+
+        String invalidBody = """
+                {
+                  "userId": %d,
+                  "offerId": null,
+                  "hotelId": null,
+                  "boardType": "ROOM_ONLY",
+                  "visitDate": "2026-05-22",
+                  "companions": [
+                    {
+                      "firstName": "Ana",
+                      "lastName": "Garcia",
+                      "birthDate": "1988-03-10"
+                    }
+                  ]
+                }
+                """.formatted(user.getId());
+
+        ResponseEntity<String> response = postJson("/api/bookings", invalidBody);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertErrorContract(body, 400, "Bad Request", "Invalid booking data", "/api/bookings");
+    }
+
+    @Test
     void postBookings_shouldReturn409WithApiError_whenHotelIsFull() throws Exception {
         User user = saveUser("david@example.com", "12345678A");
         Hotel hotel = saveHotel(1);

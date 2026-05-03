@@ -167,6 +167,28 @@ class OfferControllerIT {
     }
 
     @Test
+    void postOffers_shouldReturn400WithApiError_whenBoardTypeIsInvalid() throws Exception {
+        String invalidBody = """
+                {
+                  "title": "Oferta Familiar Magic Park",
+                  "description": "Hotel + entradas para 2 adultos y 2 ninos.",
+                  "hotelId": %d,
+                  "boardType": "ROOM_ONLY",
+                  "includedTickets": 4,
+                  "totalPrice": 399.99,
+                  "imageUrl": "https://example.com/offer.jpg"
+                }
+                """.formatted(hotelId);
+
+        ResponseEntity<String> response = postJson("/api/offers", invalidBody);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("message").asText()).isEqualTo("Invalid offer data");
+        assertThat(body.get("path").asText()).isEqualTo("/api/offers");
+    }
+
+    @Test
     void postOffers_shouldReturn404WithApiError_whenHotelNotFound() throws Exception {
         OfferCreateRequest request = new OfferCreateRequest(
                 "Oferta Familiar Magic Park",
