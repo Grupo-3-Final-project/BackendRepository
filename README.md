@@ -64,6 +64,9 @@ MAIL_PASSWORD
 JWT_SECRET
 JWT_EXPIRATION
 APP_DEMO_DATA_ENABLED
+APP_DEMO_ADMIN_USERNAME
+APP_DEMO_ADMIN_EMAIL
+APP_DEMO_ADMIN_PASSWORD
 ```
 
 ## Arranque rápido en local
@@ -122,6 +125,11 @@ En el perfil `dev`, si `APP_DEMO_DATA_ENABLED=true`, el backend crea automática
 
 Esto deja el dashboard y los endpoints principales con datos desde el primer arranque.
 
+Tambien crea una credencial interna para las rutas protegidas:
+
+- `username`: valor de `APP_DEMO_ADMIN_USERNAME`
+- `password`: valor de `APP_DEMO_ADMIN_PASSWORD`
+
 ## Swagger
 
 Con la aplicación levantada:
@@ -157,5 +165,5 @@ La referencia funcional de la API está en:
 ## Notas de operación
 
 - Cloudinary requiere `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` y `CLOUDINARY_API_SECRET`.
-- El login actual usa el email del usuario como `username`.
+- El login interno usa la credencial definida por `APP_DEMO_ADMIN_USERNAME` y `APP_DEMO_ADMIN_PASSWORD`.
 - El perfil `prod` no carga datos demo y valida el esquema de base de datos en arranque.

@@ -48,6 +48,7 @@ Codigos HTTP acordados:
 | `201 Created` | Recurso creado correctamente |
 | `204 No Content` | Eliminacion correcta sin body |
 | `400 Bad Request` | Error de validacion o datos incorrectos |
+| `401 Unauthorized` | Credenciales invalidas o autenticacion requerida |
 | `404 Not Found` | Recurso no encontrado |
 | `409 Conflict` | Conflicto con una regla de negocio |
 | `500 Internal Server Error` | Error inesperado del servidor |
@@ -188,6 +189,44 @@ Response:
 204 No Content
 ```
 
+`GET /api/users`, `GET /api/users/{id}`, `PUT /api/users/{id}` y `DELETE /api/users/{id}` requieren autenticacion interna con JWT.
+
+## 3.1. Auth interna
+
+Este modulo es solo para rutas internas de administracion y taquilla. No aplica a visitantes ni a la compra publica.
+
+### POST /api/auth/login
+
+Valida una credencial interna y devuelve un JWT Bearer.
+
+Request:
+
+```json
+{
+  "username": "admin",
+  "password": "admin12345"
+}
+```
+
+Response `200 OK`:
+
+```json
+{
+  "token": "eyJhbGciOiJIUzUxMiJ9...",
+  "type": "Bearer",
+  "credentialId": 1,
+  "username": "admin",
+  "email": "admin@parque.local",
+  "role": "ADMIN",
+  "expiresAt": "2026-05-22T10:30:00"
+}
+```
+
+Errores posibles:
+
+- `400 Bad Request`: `Invalid login data`
+- `401 Unauthorized`: `Invalid credentials`
+
 ## 4. Hoteles
 
 Entidad usada para mostrar hoteles, crear reservas y calcular ofertas. Debe reflejar habitaciones, plazas totales y plazas disponibles.
@@ -320,6 +359,8 @@ Response:
 204 No Content
 ```
 
+`POST /api/hotels`, `PUT /api/hotels/{id}` y `DELETE /api/hotels/{id}` requieren autenticacion interna con JWT.
+
 ## 5. Atracciones
 
 Valores propuestos para `size`: `SMALL`, `MEDIUM`, `LARGE`.
@@ -450,6 +491,8 @@ Response:
 204 No Content
 ```
 
+`POST /api/attractions`, `PUT /api/attractions/{id}` y `DELETE /api/attractions/{id}` requieren autenticacion interna con JWT.
+
 ## 6. Empleados
 
 Entidad usada para limpiadores, animadores y tecnicos. Incluye `dni` como identificador documental del empleado.
@@ -574,6 +617,8 @@ Response:
 204 No Content
 ```
 
+Todos los endpoints de `/api/employees` requieren autenticacion interna con JWT.
+
 ## 7. Ofertas
 
 Las ofertas combinan hotel, tipo de pension y entradas.
@@ -639,6 +684,8 @@ Request:
   "imageUrl": "https://example.com/offer.jpg"
 }
 ```
+
+`POST /api/offers` requiere autenticacion interna con JWT.
 
 Response `201 Created`:
 
@@ -756,6 +803,8 @@ Response `200 OK`:
 ]
 ```
 
+Requiere autenticacion interna con JWT.
+
 ### GET /api/bookings/{id}
 
 Devuelve el detalle completo de una reserva.
@@ -789,6 +838,8 @@ Response `200 OK`:
 }
 ```
 
+Requiere autenticacion interna con JWT.
+
 ## 9. Turnos de empleados
 
 ### GET /api/shifts
@@ -810,6 +861,8 @@ Response `200 OK`:
   }
 ]
 ```
+
+Requiere autenticacion interna con JWT.
 
 ### POST /api/shifts/generate
 
@@ -839,6 +892,8 @@ Errores posibles:
 
 - `409 Conflict`: `Not enough employees to cover required shifts`
 
+Requiere autenticacion interna con JWT.
+
 ## 10. Mantenimiento de atracciones
 
 Valores propuestos para `status`: `SCHEDULED`, `COMPLETED`, `CANCELLED`.
@@ -866,6 +921,8 @@ Response `200 OK`:
   }
 ]
 ```
+
+Requiere autenticacion interna con JWT.
 
 ### POST /api/maintenance/generate
 
@@ -895,6 +952,8 @@ Errores posibles:
 
 - `409 Conflict`: `Not enough technicians available`
 
+Requiere autenticacion interna con JWT.
+
 ## 11. Dashboard de direccion
 
 Estos endpoints devuelven metricas funcionales calculadas por backend.
@@ -922,6 +981,8 @@ Response `200 OK`:
 ]
 ```
 
+Requiere autenticacion interna con JWT.
+
 ### GET /api/dashboard/current-year-revenue
 
 Devuelve el total ganado en el ano en curso.
@@ -934,6 +995,8 @@ Response `200 OK`:
   "totalRevenue": 15420.50
 }
 ```
+
+Requiere autenticacion interna con JWT.
 
 ### GET /api/dashboard/top-hotels?year=2026
 
@@ -960,6 +1023,8 @@ Response `200 OK`:
   }
 ]
 ```
+
+Requiere autenticacion interna con JWT.
 
 ### GET /api/dashboard/summary?year=2026
 
@@ -1005,6 +1070,8 @@ Response `200 OK`:
 }
 ```
 
+Requiere autenticacion interna con JWT.
+
 ## 12. Imagenes con Cloudinary
 
 Este endpoint puede usarse para subir imagenes de hoteles, atracciones, ofertas o empleados.
@@ -1033,7 +1100,10 @@ Response `201 Created`:
 Errores posibles:
 
 - `400 Bad Request`: `Invalid image file`
+- `401 Unauthorized`: `Authentication is required`
 - `500 Internal Server Error`: `Image upload failed`
+
+Requiere autenticacion interna con JWT.
 
 ## 13. Swagger/OpenAPI
 
