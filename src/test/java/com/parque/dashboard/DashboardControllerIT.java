@@ -2,32 +2,36 @@ package com.parque.dashboard;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parque.booking.dto.BookingCreateRequest;
+import com.parque.booking.dto.CompanionRequest;
 import com.parque.dashboard.repository.BookingDashboardRepository;
 import com.parque.dashboard.repository.TicketRepository;
-import com.parque.entity.Booking;
 import com.parque.entity.Hotel;
-import com.parque.entity.Ticket;
 import com.parque.entity.User;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.testconfig.JacksonTestConfig;
 import com.parque.user.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -57,8 +61,18 @@ class DashboardControllerIT {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @BeforeEach
+    void setUp() {
+        ticketRepository.deleteAll();
+        bookingDashboardRepository.deleteAll();
+        hotelRepository.deleteAll();
+        userRepository.deleteAll();
+    }
+
     @Test
     void endpoints_shouldReturn200WithEmptyMetricsWhenNoData() throws Exception {
+        int currentYear = LocalDate.now().getYear();
+
         ResponseEntity<String> revenue = restClient()
                 .get()
                 .uri("/api/dashboard/current-year-revenue")
@@ -67,43 +81,48 @@ class DashboardControllerIT {
 
         assertThat(revenue.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode revenueBody = objectMapper.readTree(revenue.getBody());
-        assertThat(revenueBody.get("year").isNumber()).isTrue();
-        assertThat(revenueBody.get("totalRevenue").isNumber()).isTrue();
+        assertThat(fieldNames(revenueBody)).containsExactly("year", "totalRevenue");
+        assertThat(revenueBody.get("year").asInt()).isEqualTo(currentYear);
+        assertThat(revenueBody.get("totalRevenue").asDouble()).isEqualTo(0.0);
 
         ResponseEntity<String> tickets = restClient()
                 .get()
-                .uri("/api/dashboard/tickets-by-age-range?year=2026")
+                .uri("/api/dashboard/tickets-by-age-range?year=" + currentYear)
                 .retrieve()
                 .toEntity(String.class);
         assertThat(tickets.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode ticketsBody = objectMapper.readTree(tickets.getBody());
         assertThat(ticketsBody.isArray()).isTrue();
+        assertThat(ticketsBody).isEmpty();
 
         ResponseEntity<String> topHotels = restClient()
                 .get()
-                .uri("/api/dashboard/top-hotels?year=2026")
+                .uri("/api/dashboard/top-hotels?year=" + currentYear)
                 .retrieve()
                 .toEntity(String.class);
         assertThat(topHotels.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode topHotelsBody = objectMapper.readTree(topHotels.getBody());
         assertThat(topHotelsBody.isArray()).isTrue();
+        assertThat(topHotelsBody).isEmpty();
 
         ResponseEntity<String> summary = restClient()
                 .get()
-                .uri("/api/dashboard/summary?year=2026")
+                .uri("/api/dashboard/summary?year=" + currentYear)
                 .retrieve()
                 .toEntity(String.class);
         assertThat(summary.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode summaryBody = objectMapper.readTree(summary.getBody());
-        assertThat(summaryBody.get("year").asInt()).isEqualTo(2026);
+        assertThat(fieldNames(summaryBody)).containsExactly("year", "totalRevenue", "ticketsByAgeRange", "topHotels");
+        assertThat(summaryBody.get("year").asInt()).isEqualTo(currentYear);
+        assertThat(summaryBody.get("totalRevenue").asDouble()).isEqualTo(0.0);
+        assertThat(summaryBody.get("ticketsByAgeRange")).isEmpty();
+        assertThat(summaryBody.get("topHotels")).isEmpty();
     }
 
     @Test
-    void endpoints_shouldReturnRealMetricsFromSeededBookings() throws Exception {
-        ticketRepository.deleteAll();
-        bookingDashboardRepository.deleteAll();
-        hotelRepository.deleteAll();
-        userRepository.deleteAll();
+    void endpoints_shouldReturnRealMetricsFromBookingsCreatedThroughApi() throws Exception {
+        int currentYear = LocalDate.now().getYear();
+        int previousYear = currentYear - 1;
 
         User user = userRepository.save(User.builder()
                 .firstName("David")
@@ -114,77 +133,128 @@ class DashboardControllerIT {
                 .birthDate(LocalDate.parse("1990-04-15"))
                 .build());
 
-        Hotel hotelA = hotelRepository.save(Hotel.builder()
-                .name("Hotel Magic Park")
-                .description("Hotel familiar situado junto al parque.")
-                .totalRooms(120)
-                .availableRooms(120)
-                .totalPlaces(240)
-                .availablePlaces(240)
-                .halfBoardPrice(new BigDecimal("80.0"))
-                .fullBoardPrice(new BigDecimal("120.0"))
-                .imageUrl("https://example.com/hotel.jpg")
-                .build());
+        Hotel hotelMagicPark = saveHotel(
+                "Hotel Magic Park",
+                "Hotel familiar situado junto al parque.",
+                120,
+                240,
+                new BigDecimal("80.0"),
+                new BigDecimal("120.0"),
+                "https://example.com/hotel.jpg"
+        );
 
-        Hotel hotelB = hotelRepository.save(Hotel.builder()
-                .name("Hotel Adventure")
-                .description("Hotel junto al parque.")
-                .totalRooms(100)
-                .availableRooms(100)
-                .totalPlaces(200)
-                .availablePlaces(200)
-                .halfBoardPrice(new BigDecimal("70.0"))
-                .fullBoardPrice(new BigDecimal("110.0"))
-                .imageUrl("https://example.com/hotel2.jpg")
-                .build());
+        Hotel hotelAdventure = saveHotel(
+                "Hotel Adventure",
+                "Hotel junto al parque.",
+                100,
+                200,
+                new BigDecimal("70.0"),
+                new BigDecimal("110.0"),
+                "https://example.com/hotel2.jpg"
+        );
 
-        createBooking(user, hotelA, LocalDateTime.parse("2026-05-01T10:00:00"), new BigDecimal("300.00"), List.of(
-                new TicketSeed("Ana Garcia", "ADULT", new BigDecimal("45.00")),
-                new TicketSeed("Lucas Garcia", "CHILD", new BigDecimal("25.00")),
-                new TicketSeed("Maria Perez", "SENIOR", new BigDecimal("30.00"))
-        ));
+        Hotel hotelFantasy = saveHotel(
+                "Hotel Fantasy",
+                "Hotel tematico.",
+                90,
+                180,
+                new BigDecimal("60.0"),
+                new BigDecimal("90.0"),
+                "https://example.com/hotel3.jpg"
+        );
 
-        createBooking(user, hotelA, LocalDateTime.parse("2026-06-01T10:00:00"), new BigDecimal("200.00"), List.of(
-                new TicketSeed("Pedro Lopez", "ADULT", new BigDecimal("45.00")),
-                new TicketSeed("Laura Lopez", "ADULT", new BigDecimal("45.00"))
-        ));
+        Hotel hotelOcean = saveHotel(
+                "Hotel Ocean",
+                "Hotel acuatico.",
+                80,
+                160,
+                new BigDecimal("55.0"),
+                new BigDecimal("85.0"),
+                "https://example.com/hotel4.jpg"
+        );
 
-        createBooking(user, hotelB, LocalDateTime.parse("2026-07-01T10:00:00"), new BigDecimal("100.00"), List.of(
-                new TicketSeed("Nina Ruiz", "CHILD", new BigDecimal("25.00"))
-        ));
+        long bookingOneId = createBookingThroughApi(
+                user.getId(),
+                hotelMagicPark.getId(),
+                "FULL_BOARD",
+                List.of(
+                        new CompanionRequest("Ana", "Garcia", LocalDate.parse("1988-03-10")),
+                        new CompanionRequest("Lucas", "Garcia", LocalDate.parse("2015-07-20")),
+                        new CompanionRequest("Maria", "Perez", LocalDate.parse("1950-08-01"))
+                )
+        );
+        updateBookingCreatedAt(bookingOneId, LocalDateTime.of(currentYear, 5, 1, 10, 0, 0));
 
-        createBooking(user, hotelB, LocalDateTime.parse("2025-07-01T10:00:00"), new BigDecimal("999.00"), List.of(
-                new TicketSeed("Old Ticket", "ADULT", new BigDecimal("45.00"))
-        ));
+        long bookingTwoId = createBookingThroughApi(
+                user.getId(),
+                hotelMagicPark.getId(),
+                "HALF_BOARD",
+                List.of(
+                        new CompanionRequest("Pedro", "Lopez", LocalDate.parse("1987-01-10")),
+                        new CompanionRequest("Laura", "Lopez", LocalDate.parse("1991-02-15"))
+                )
+        );
+        updateBookingCreatedAt(bookingTwoId, LocalDateTime.of(currentYear, 6, 1, 10, 0, 0));
+
+        long bookingThreeId = createBookingThroughApi(
+                user.getId(),
+                hotelAdventure.getId(),
+                "HALF_BOARD",
+                List.of(
+                        new CompanionRequest("Nina", "Ruiz", LocalDate.parse("2012-04-18")),
+                        new CompanionRequest("Jorge", "Ruiz", LocalDate.parse("1986-11-05"))
+                )
+        );
+        updateBookingCreatedAt(bookingThreeId, LocalDateTime.of(currentYear, 7, 1, 10, 0, 0));
+
+        long bookingFourId = createBookingThroughApi(
+                user.getId(),
+                hotelFantasy.getId(),
+                "HALF_BOARD",
+                List.of(new CompanionRequest("Pablo", "Sanchez", LocalDate.parse("1975-01-01")))
+        );
+        updateBookingCreatedAt(bookingFourId, LocalDateTime.of(currentYear, 8, 1, 10, 0, 0));
+
+        long bookingFiveId = createBookingThroughApi(
+                user.getId(),
+                hotelOcean.getId(),
+                "HALF_BOARD",
+                List.of(new CompanionRequest("Elena", "Martin", LocalDate.parse("1989-06-06")))
+        );
+        updateBookingCreatedAt(bookingFiveId, LocalDateTime.of(currentYear, 9, 1, 10, 0, 0));
+
+        long bookingSixId = createBookingThroughApi(
+                user.getId(),
+                null,
+                "HALF_BOARD",
+                List.of(new CompanionRequest("Mario", "Gil", LocalDate.parse("1993-03-03")))
+        );
+        updateBookingCreatedAt(bookingSixId, LocalDateTime.of(currentYear, 10, 1, 10, 0, 0));
+
+        long previousYearBookingId = createBookingThroughApi(
+                user.getId(),
+                hotelAdventure.getId(),
+                "FULL_BOARD",
+                List.of(new CompanionRequest("Old", "Ticket", LocalDate.parse("1980-07-07")))
+        );
+        updateBookingCreatedAt(previousYearBookingId, LocalDateTime.of(previousYear, 7, 1, 10, 0, 0));
 
         ResponseEntity<String> tickets = restClient()
                 .get()
-                .uri("/api/dashboard/tickets-by-age-range?year=2026")
+                .uri("/api/dashboard/tickets-by-age-range?year=" + currentYear)
                 .retrieve()
                 .toEntity(String.class);
         assertThat(tickets.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode ticketsBody = objectMapper.readTree(tickets.getBody());
         assertThat(ticketsBody.isArray()).isTrue();
-
-        long adultCount = 0;
-        long childCount = 0;
-        long seniorCount = 0;
-        for (JsonNode row : ticketsBody) {
-            String ageRange = row.get("ageRange").asText();
-            long ticketsSold = row.get("ticketsSold").asLong();
-            if ("ADULT".equals(ageRange)) {
-                adultCount = ticketsSold;
-            }
-            if ("CHILD".equals(ageRange)) {
-                childCount = ticketsSold;
-            }
-            if ("SENIOR".equals(ageRange)) {
-                seniorCount = ticketsSold;
-            }
-        }
-        assertThat(adultCount).isEqualTo(3);
-        assertThat(childCount).isEqualTo(2);
-        assertThat(seniorCount).isEqualTo(1);
+        assertThat(ticketsBody).hasSize(3);
+        assertThat(fieldNames(ticketsBody.get(0))).containsExactly("ageRange", "ticketsSold");
+        assertThat(ticketsBody.get(0).get("ageRange").asText()).isEqualTo("CHILD");
+        assertThat(ticketsBody.get(0).get("ticketsSold").asLong()).isEqualTo(2);
+        assertThat(ticketsBody.get(1).get("ageRange").asText()).isEqualTo("ADULT");
+        assertThat(ticketsBody.get(1).get("ticketsSold").asLong()).isEqualTo(7);
+        assertThat(ticketsBody.get(2).get("ageRange").asText()).isEqualTo("SENIOR");
+        assertThat(ticketsBody.get(2).get("ticketsSold").asLong()).isEqualTo(1);
 
         ResponseEntity<String> revenue = restClient()
                 .get()
@@ -193,68 +263,109 @@ class DashboardControllerIT {
                 .toEntity(String.class);
         assertThat(revenue.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode revenueBody = objectMapper.readTree(revenue.getBody());
-        assertThat(revenueBody.get("year").asInt()).isEqualTo(2026);
-        assertThat(revenueBody.get("totalRevenue").asDouble()).isEqualTo(600.0);
+        assertThat(revenueBody.get("year").asInt()).isEqualTo(currentYear);
+        assertThat(revenueBody.get("totalRevenue").asDouble()).isEqualTo(780.0);
 
         ResponseEntity<String> topHotels = restClient()
                 .get()
-                .uri("/api/dashboard/top-hotels?year=2026")
+                .uri("/api/dashboard/top-hotels?year=" + currentYear)
                 .retrieve()
                 .toEntity(String.class);
         assertThat(topHotels.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode topHotelsBody = objectMapper.readTree(topHotels.getBody());
         assertThat(topHotelsBody.isArray()).isTrue();
-        assertThat(topHotelsBody.size()).isGreaterThanOrEqualTo(2);
-        assertThat(topHotelsBody.get(0).get("hotelId").asLong()).isEqualTo(hotelA.getId());
+        assertThat(topHotelsBody).hasSize(3);
+        assertThat(fieldNames(topHotelsBody.get(0))).containsExactly("hotelId", "hotelName", "revenue");
+        assertThat(topHotelsBody.get(0).get("hotelId").asLong()).isEqualTo(hotelMagicPark.getId());
         assertThat(topHotelsBody.get(0).get("hotelName").asText()).isEqualTo("Hotel Magic Park");
-        assertThat(topHotelsBody.get(0).get("revenue").asDouble()).isEqualTo(500.0);
-
-        assertThat(topHotelsBody.get(1).get("hotelId").asLong()).isEqualTo(hotelB.getId());
+        assertThat(topHotelsBody.get(0).get("revenue").asDouble()).isEqualTo(390.0);
+        assertThat(topHotelsBody.get(1).get("hotelId").asLong()).isEqualTo(hotelAdventure.getId());
         assertThat(topHotelsBody.get(1).get("hotelName").asText()).isEqualTo("Hotel Adventure");
-        assertThat(topHotelsBody.get(1).get("revenue").asDouble()).isEqualTo(100.0);
+        assertThat(topHotelsBody.get(1).get("revenue").asDouble()).isEqualTo(140.0);
+        assertThat(topHotelsBody.get(2).get("hotelId").asLong()).isEqualTo(hotelFantasy.getId());
+        assertThat(topHotelsBody.get(2).get("hotelName").asText()).isEqualTo("Hotel Fantasy");
+        assertThat(topHotelsBody.get(2).get("revenue").asDouble()).isEqualTo(105.0);
 
         ResponseEntity<String> summary = restClient()
                 .get()
-                .uri("/api/dashboard/summary?year=2026")
+                .uri("/api/dashboard/summary?year=" + currentYear)
                 .retrieve()
                 .toEntity(String.class);
         assertThat(summary.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode summaryBody = objectMapper.readTree(summary.getBody());
-        assertThat(summaryBody.get("year").asInt()).isEqualTo(2026);
-        assertThat(summaryBody.get("totalRevenue").asDouble()).isEqualTo(600.0);
-        assertThat(summaryBody.get("ticketsByAgeRange").isArray()).isTrue();
-        assertThat(summaryBody.get("topHotels").isArray()).isTrue();
+        assertThat(fieldNames(summaryBody)).containsExactly("year", "totalRevenue", "ticketsByAgeRange", "topHotels");
+        assertThat(summaryBody.get("year").asInt()).isEqualTo(currentYear);
+        assertThat(summaryBody.get("totalRevenue").asDouble()).isEqualTo(780.0);
+        assertThat(summaryBody.get("ticketsByAgeRange")).hasSize(3);
+        assertThat(summaryBody.get("topHotels")).hasSize(3);
     }
 
-    private void createBooking(User user, Hotel hotel, LocalDateTime createdAt, BigDecimal totalPrice, List<TicketSeed> ticketSeeds) {
-        Booking booking = Booking.builder()
-                .user(user)
-                .hotel(hotel)
-                .boardType("FULL_BOARD")
-                .visitDate(LocalDate.parse("2026-05-22"))
-                .totalPrice(totalPrice)
-                .emailSent(true)
-                .build();
+    private Hotel saveHotel(
+            String name,
+            String description,
+            int totalRooms,
+            int totalPlaces,
+            BigDecimal halfBoardPrice,
+            BigDecimal fullBoardPrice,
+            String imageUrl
+    ) {
+        return hotelRepository.save(Hotel.builder()
+                .name(name)
+                .description(description)
+                .totalRooms(totalRooms)
+                .availableRooms(totalRooms)
+                .totalPlaces(totalPlaces)
+                .availablePlaces(totalPlaces)
+                .halfBoardPrice(halfBoardPrice)
+                .fullBoardPrice(fullBoardPrice)
+                .imageUrl(imageUrl)
+                .build());
+    }
 
-        List<Ticket> tickets = ticketSeeds.stream()
-                .map(seed -> Ticket.builder()
-                        .booking(booking)
-                        .holderFullName(seed.holderFullName())
-                        .ageRange(seed.ageRange())
-                        .price(seed.price())
-                        .build())
-                .toList();
+    private long createBookingThroughApi(
+            Long userId,
+            Long hotelId,
+            String boardType,
+            List<CompanionRequest> companions
+    ) throws Exception {
+        BookingCreateRequest request = new BookingCreateRequest(
+                userId,
+                null,
+                hotelId,
+                boardType,
+                LocalDate.parse("2026-05-22"),
+                companions
+        );
 
-        booking.setTickets(tickets);
-        Booking saved = bookingDashboardRepository.save(booking);
+        ResponseEntity<String> response = postJson("/api/bookings", objectMapper.writeValueAsString(request));
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        return objectMapper.readTree(response.getBody()).get("id").asLong();
+    }
+
+    private void updateBookingCreatedAt(long bookingId, LocalDateTime createdAt) {
         jdbcTemplate.update(
                 "update bookings set created_at = ? where id = ?",
                 Timestamp.valueOf(createdAt),
-                saved.getId()
+                bookingId
         );
     }
 
-    private record TicketSeed(String holderFullName, String ageRange, BigDecimal price) {
+    private ResponseEntity<String> postJson(String path, String body) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        return restClient()
+                .post()
+                .uri(path)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .body(body)
+                .retrieve()
+                .toEntity(String.class);
+    }
+
+    private List<String> fieldNames(JsonNode node) {
+        Set<String> fieldNames = new LinkedHashSet<>();
+        node.fieldNames().forEachRemaining(fieldNames::add);
+        return fieldNames.stream().toList();
     }
 
     private RestClient restClient() {
