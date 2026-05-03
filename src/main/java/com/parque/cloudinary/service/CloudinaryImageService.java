@@ -13,15 +13,18 @@ public class CloudinaryImageService implements ImageService {
 
     private static final Set<String> ALLOWED_FOLDERS = Set.of("hotels", "attractions", "offers", "employees");
 
+    private final CloudinaryUploadClient cloudinaryUploadClient;
     private final String cloudName;
     private final String apiKey;
     private final String apiSecret;
 
     public CloudinaryImageService(
+            CloudinaryUploadClient cloudinaryUploadClient,
             @Value("${CLOUDINARY_CLOUD_NAME:}") String cloudName,
             @Value("${CLOUDINARY_API_KEY:}") String apiKey,
             @Value("${CLOUDINARY_API_SECRET:}") String apiSecret
     ) {
+        this.cloudinaryUploadClient = cloudinaryUploadClient;
         this.cloudName = cloudName;
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
@@ -43,6 +46,11 @@ public class CloudinaryImageService implements ImageService {
             throw new InternalServerErrorException("Image upload failed");
         }
 
-        throw new InternalServerErrorException("Image upload failed");
+        try {
+            CloudinaryUploadResult uploaded = cloudinaryUploadClient.upload(file, folder, cloudName, apiKey, apiSecret);
+            return new ImageUploadResponse(uploaded.imageUrl(), uploaded.publicId());
+        } catch (Exception exception) {
+            throw new InternalServerErrorException("Image upload failed");
+        }
     }
 }
