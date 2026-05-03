@@ -2,9 +2,11 @@ package com.parque.auth;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.parque.entity.User;
+import com.parque.auth.repository.InternalCredentialRepository;
+import com.parque.dashboard.repository.BookingDashboardRepository;
 import com.parque.testconfig.JacksonTestConfig;
-import com.parque.user.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.parque.testsupport.InternalAuthSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,6 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
-
-import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -34,28 +34,27 @@ class AuthControllerIT {
     private ObjectMapper objectMapper;
 
     @Autowired
-    private UserRepository userRepository;
+    private InternalCredentialRepository internalCredentialRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private BookingDashboardRepository bookingDashboardRepository;
 
     @BeforeEach
     void setUp() {
-        userRepository.deleteAll();
+        bookingDashboardRepository.deleteAll();
+        internalCredentialRepository.deleteAll();
+        InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
     }
 
     @Test
     void postLogin_shouldReturn200AndLoginResponse() throws Exception {
-        userRepository.save(User.builder()
-                .firstName("David")
-                .lastName("Navarro")
-                .dni("12345678A")
-                .email("david@example.com")
-                .phone("600123123")
-                .birthDate(LocalDate.parse("1990-04-15"))
-                .build());
-
         String body = """
                 {
-                  "username": "david@example.com",
-                  "password": "secret"
+                  "username": "admin",
+                  "password": "admin12345"
                 }
                 """;
 
@@ -65,8 +64,11 @@ class AuthControllerIT {
         JsonNode json = objectMapper.readTree(response.getBody());
         assertThat(json.get("token").asText()).isNotBlank();
         assertThat(json.get("type").asText()).isEqualTo("Bearer");
-        assertThat(json.get("username").asText()).isEqualTo("david@example.com");
-        assertThat(json.get("email").asText()).isEqualTo("david@example.com");
+        assertThat(json.get("credentialId").asLong()).isPositive();
+        assertThat(json.get("username").asText()).isEqualTo("admin");
+        assertThat(json.get("email").asText()).isEqualTo("admin@parque.local");
+        assertThat(json.get("role").asText()).isEqualTo("ADMIN");
+        assertThat(json.get("expiresAt").asText()).isNotBlank();
     }
 
     @Test
@@ -90,22 +92,39 @@ class AuthControllerIT {
     }
 
     @Test
-    void postLogin_shouldReturn404WithApiError_whenUserDoesNotExist() throws Exception {
+    void postLogin_shouldReturn401WithApiError_whenCredentialsAreInvalid() throws Exception {
         String body = """
                 {
-                  "username": "missing@example.com",
-                  "password": "secret"
+                  "username": "admin",
+                  "password": "wrong-password"
                 }
                 """;
 
         ResponseEntity<String> response = postJson("/api/auth/login", body);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
         JsonNode json = objectMapper.readTree(response.getBody());
-        assertThat(json.get("status").asInt()).isEqualTo(404);
-        assertThat(json.get("error").asText()).isEqualTo("Not Found");
-        assertThat(json.get("message").asText()).isEqualTo("User not found");
+        assertThat(json.get("status").asInt()).isEqualTo(401);
+        assertThat(json.get("error").asText()).isEqualTo("Unauthorized");
+        assertThat(json.get("message").asText()).isEqualTo("Invalid credentials");
         assertThat(json.get("path").asText()).isEqualTo("/api/auth/login");
+        assertThat(json.get("timestamp").asText()).isNotBlank();
+    }
+
+    @Test
+    void protectedRoute_shouldReturn401WithApiError_whenTokenIsMissing() throws Exception {
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/dashboard/current-year-revenue")
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        JsonNode json = objectMapper.readTree(response.getBody());
+        assertThat(json.get("status").asInt()).isEqualTo(401);
+        assertThat(json.get("error").asText()).isEqualTo("Unauthorized");
+        assertThat(json.get("message").asText()).isEqualTo("Authentication is required");
+        assertThat(json.get("path").asText()).isEqualTo("/api/dashboard/current-year-revenue");
         assertThat(json.get("timestamp").asText()).isNotBlank();
     }
 

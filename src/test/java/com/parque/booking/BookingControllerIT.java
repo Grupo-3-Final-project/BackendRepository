@@ -1,5 +1,6 @@
 package com.parque.booking;
 
+import com.parque.auth.repository.InternalCredentialRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.booking.dto.BookingCreateRequest;
@@ -10,6 +11,7 @@ import com.parque.entity.User;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.repository.OfferRepository;
 import com.parque.testconfig.JacksonTestConfig;
+import com.parque.testsupport.InternalAuthSupport;
 import com.parque.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +23,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
@@ -55,12 +58,19 @@ class BookingControllerIT {
     @Autowired
     private OfferRepository offerRepository;
 
+    @Autowired
+    private InternalCredentialRepository internalCredentialRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         bookingRepository.deleteAll();
         offerRepository.deleteAll();
         hotelRepository.deleteAll();
         userRepository.deleteAll();
+        InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
     }
 
     @Test
@@ -276,6 +286,7 @@ class BookingControllerIT {
         ResponseEntity<String> response = restClient()
                 .get()
                 .uri("/api/bookings")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
 
@@ -324,6 +335,7 @@ class BookingControllerIT {
         ResponseEntity<String> response = restClient()
                 .get()
                 .uri("/api/bookings/" + bookingId)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
 
@@ -364,6 +376,7 @@ class BookingControllerIT {
         ResponseEntity<String> response = restClient()
                 .get()
                 .uri("/api/bookings/999")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
 
@@ -390,6 +403,14 @@ class BookingControllerIT {
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                 })
                 .build();
+    }
+
+    private String authToken() {
+        try {
+            return InternalAuthSupport.login(restClient(), objectMapper);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     private void assertErrorContract(JsonNode body, int status, String error, String message, String path) {
