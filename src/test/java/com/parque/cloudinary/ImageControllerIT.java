@@ -2,9 +2,11 @@ package com.parque.cloudinary;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parque.auth.repository.InternalCredentialRepository;
 import com.parque.cloudinary.service.CloudinaryUploadClient;
 import com.parque.cloudinary.service.CloudinaryUploadResult;
 import com.parque.testconfig.JacksonTestConfig;
+import com.parque.testsupport.InternalAuthSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.util.LinkedMultiValueMap;
@@ -49,6 +52,12 @@ class ImageControllerIT {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private InternalCredentialRepository internalCredentialRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @MockitoBean
     private CloudinaryUploadClient cloudinaryUploadClient;
 
@@ -61,6 +70,7 @@ class ImageControllerIT {
         ResponseEntity<String> response = restClient()
                 .post()
                 .uri("/api/images/upload")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(body)
                 .retrieve()
@@ -80,6 +90,7 @@ class ImageControllerIT {
         ResponseEntity<String> response = restClient()
                 .post()
                 .uri("/api/images/upload")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(body)
                 .retrieve()
@@ -105,6 +116,7 @@ class ImageControllerIT {
         ResponseEntity<String> response = restClient()
                 .post()
                 .uri("/api/images/upload")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(body)
                 .retrieve()
@@ -130,6 +142,7 @@ class ImageControllerIT {
         ResponseEntity<String> response = restClient()
                 .post()
                 .uri("/api/images/upload")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + authToken())
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(body)
                 .retrieve()
@@ -146,6 +159,15 @@ class ImageControllerIT {
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                 })
                 .build();
+    }
+
+    private String authToken() {
+        try {
+            InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
+            return InternalAuthSupport.login(restClient(), objectMapper);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     private HttpEntity<ByteArrayResource> multipartFile(String filename, String contentType, byte[] content) {

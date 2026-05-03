@@ -1,8 +1,10 @@
 package com.parque.user;
 
+import com.parque.auth.repository.InternalCredentialRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.parque.testconfig.JacksonTestConfig;
+import com.parque.testsupport.InternalAuthSupport;
 import com.parque.user.dto.UserCreateRequest;
 import com.parque.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
@@ -38,9 +41,16 @@ class UserControllerIT {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private InternalCredentialRepository internalCredentialRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
+        InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
     }
 
     @Test
@@ -129,6 +139,7 @@ class UserControllerIT {
         ResponseEntity<String> response = restClient()
                 .get()
                 .uri("/api/users/999")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
 
@@ -146,6 +157,7 @@ class UserControllerIT {
         ResponseEntity<String> response = restClient()
                 .method(HttpMethod.DELETE)
                 .uri("/api/users/999")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
 
@@ -176,5 +188,13 @@ class UserControllerIT {
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                 })
                 .build();
+    }
+
+    private String authToken() {
+        try {
+            return InternalAuthSupport.login(restClient(), objectMapper);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

@@ -17,36 +17,26 @@ public class JwtProvider {
     private String jwtSecret;
 
     @Value("${jwt.expiration:86400000}")
-    private int jwtExpirationMs; // 24 hours by default
+    private int jwtExpirationMs;
 
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    /**
-     * Generate JWT token for user
-     * @param userId unique identifier for user
-     * @param username user's username
-     * @return JWT token
-     */
-    public String generateToken(Long userId, String username) {
+    public String generateToken(Long credentialId, String username, String role) {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + jwtExpirationMs);
 
         return Jwts.builder()
                 .subject(username)
-                .claim("userId", userId)
+                .claim("credentialId", credentialId)
+                .claim("role", role)
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey(), SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    /**
-     * Validate JWT token
-     * @param token JWT token to validate
-     * @return true if valid, false otherwise
-     */
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
@@ -59,41 +49,26 @@ public class JwtProvider {
         }
     }
 
-    /**
-     * Get username from JWT token
-     * @param token JWT token
-     * @return username
-     */
     public String getUsernameFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
         return claims.getSubject();
     }
 
-    /**
-     * Get userId from JWT token
-     * @param token JWT token
-     * @return userId
-     */
-    public Long getUserIdFromToken(String token) {
+    public Long getCredentialIdFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
-        return claims.get("userId", Long.class);
+        return claims.get("credentialId", Long.class);
     }
 
-    /**
-     * Get expiration date from JWT token
-     * @param token JWT token
-     * @return expiration date
-     */
+    public String getRoleFromToken(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        return claims.get("role", String.class);
+    }
+
     public Date getExpirationDateFromToken(String token) {
         Claims claims = getAllClaimsFromToken(token);
         return claims.getExpiration();
     }
 
-    /**
-     * Check if token is expired
-     * @param token JWT token
-     * @return true if expired, false otherwise
-     */
     public Boolean isTokenExpired(String token) {
         try {
             Date expiration = getExpirationDateFromToken(token);
@@ -103,11 +78,6 @@ public class JwtProvider {
         }
     }
 
-    /**
-     * Get all claims from JWT token
-     * @param token JWT token
-     * @return claims
-     */
     private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser()
                 .verifyWith(getSigningKey())

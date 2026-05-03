@@ -1,11 +1,13 @@
 package com.parque.attraction;
 
+import com.parque.auth.repository.InternalCredentialRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.attraction.dto.AttractionCreateRequest;
 import com.parque.attraction.dto.AttractionUpdateRequest;
 import com.parque.attraction.repository.AttractionRepository;
 import com.parque.testconfig.JacksonTestConfig;
+import com.parque.testsupport.InternalAuthSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,12 +16,11 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.context.annotation.Import;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
@@ -40,9 +41,16 @@ class AttractionControllerIT {
     @Autowired
     private AttractionRepository attractionRepository;
 
+    @Autowired
+    private InternalCredentialRepository internalCredentialRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         attractionRepository.deleteAll();
+        InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
     }
 
     @Test
@@ -133,6 +141,7 @@ class AttractionControllerIT {
 
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers.setBearerAuth(authToken());
         ResponseEntity<String> response = restClient()
                 .put()
                 .uri("/api/attractions/" + id)
@@ -209,6 +218,7 @@ class AttractionControllerIT {
     private ResponseEntity<String> postJson(String path, String body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers.setBearerAuth(authToken());
         return restClient()
                 .post()
                 .uri(path)
@@ -224,5 +234,13 @@ class AttractionControllerIT {
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                 })
                 .build();
+    }
+
+    private String authToken() {
+        try {
+            return InternalAuthSupport.login(restClient(), objectMapper);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

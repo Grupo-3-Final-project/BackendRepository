@@ -1,5 +1,6 @@
 package com.parque.dashboard;
 
+import com.parque.auth.repository.InternalCredentialRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.booking.dto.BookingCreateRequest;
@@ -10,6 +11,7 @@ import com.parque.entity.Hotel;
 import com.parque.entity.User;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.testconfig.JacksonTestConfig;
+import com.parque.testsupport.InternalAuthSupport;
 import com.parque.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
@@ -61,12 +64,19 @@ class DashboardControllerIT {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private InternalCredentialRepository internalCredentialRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         ticketRepository.deleteAll();
         bookingDashboardRepository.deleteAll();
         hotelRepository.deleteAll();
         userRepository.deleteAll();
+        InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
     }
 
     @Test
@@ -76,6 +86,7 @@ class DashboardControllerIT {
         ResponseEntity<String> revenue = restClient()
                 .get()
                 .uri("/api/dashboard/current-year-revenue")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
 
@@ -88,6 +99,7 @@ class DashboardControllerIT {
         ResponseEntity<String> tickets = restClient()
                 .get()
                 .uri("/api/dashboard/tickets-by-age-range?year=" + currentYear)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
         assertThat(tickets.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -98,6 +110,7 @@ class DashboardControllerIT {
         ResponseEntity<String> topHotels = restClient()
                 .get()
                 .uri("/api/dashboard/top-hotels?year=" + currentYear)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
         assertThat(topHotels.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -108,6 +121,7 @@ class DashboardControllerIT {
         ResponseEntity<String> summary = restClient()
                 .get()
                 .uri("/api/dashboard/summary?year=" + currentYear)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
         assertThat(summary.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -242,6 +256,7 @@ class DashboardControllerIT {
         ResponseEntity<String> tickets = restClient()
                 .get()
                 .uri("/api/dashboard/tickets-by-age-range?year=" + currentYear)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
         assertThat(tickets.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -259,6 +274,7 @@ class DashboardControllerIT {
         ResponseEntity<String> revenue = restClient()
                 .get()
                 .uri("/api/dashboard/current-year-revenue")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
         assertThat(revenue.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -269,6 +285,7 @@ class DashboardControllerIT {
         ResponseEntity<String> topHotels = restClient()
                 .get()
                 .uri("/api/dashboard/top-hotels?year=" + currentYear)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
         assertThat(topHotels.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -289,6 +306,7 @@ class DashboardControllerIT {
         ResponseEntity<String> summary = restClient()
                 .get()
                 .uri("/api/dashboard/summary?year=" + currentYear)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
                 .retrieve()
                 .toEntity(String.class);
         assertThat(summary.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -374,5 +392,13 @@ class DashboardControllerIT {
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                 })
                 .build();
+    }
+
+    private String authToken() {
+        try {
+            return InternalAuthSupport.login(restClient(), objectMapper);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

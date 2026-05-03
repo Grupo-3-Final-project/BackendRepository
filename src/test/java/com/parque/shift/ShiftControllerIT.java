@@ -1,5 +1,6 @@
 package com.parque.shift;
 
+import com.parque.auth.repository.InternalCredentialRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.employee.dto.EmployeeCreateRequest;
@@ -8,6 +9,7 @@ import com.parque.employee.service.EmployeeService;
 import com.parque.shift.dto.ShiftGenerateRequest;
 import com.parque.shift.repository.ShiftRepository;
 import com.parque.testconfig.JacksonTestConfig;
+import com.parque.testsupport.InternalAuthSupport;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
@@ -45,10 +48,17 @@ class ShiftControllerIT {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private InternalCredentialRepository internalCredentialRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setUp() {
         shiftRepository.deleteAll();
         employeeRepository.deleteAll();
+        InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
     }
 
     @Test
@@ -75,6 +85,7 @@ class ShiftControllerIT {
     private ResponseEntity<String> postJson(String path, String body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers.setBearerAuth(authToken());
         return restClient()
                 .post()
                 .uri(path)
@@ -90,5 +101,13 @@ class ShiftControllerIT {
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                 })
                 .build();
+    }
+
+    private String authToken() {
+        try {
+            return InternalAuthSupport.login(restClient(), objectMapper);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

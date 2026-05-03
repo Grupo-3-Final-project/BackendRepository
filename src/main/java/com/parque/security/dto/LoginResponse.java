@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,17 +15,28 @@ public class LoginResponse {
 
     private String token;
     private String type;
-    private Long userId;
+    private Long credentialId;
     private String username;
     private String email;
+    private String role;
+    private LocalDateTime expiresAt;
 
-    public static LoginResponse of(String token, Long userId, String username, String email) {
+    public static LoginResponse of(
+            String token,
+            Long credentialId,
+            String username,
+            String email,
+            String role,
+            LocalDateTime expiresAt
+    ) {
         return LoginResponse.builder()
                 .token(token)
                 .type("Bearer")
-                .userId(userId)
+                .credentialId(credentialId)
                 .username(username)
                 .email(email)
+                .role(role)
+                .expiresAt(expiresAt)
                 .build();
     }
 }

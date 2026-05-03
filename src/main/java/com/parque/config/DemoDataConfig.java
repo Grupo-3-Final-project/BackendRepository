@@ -1,5 +1,7 @@
 package com.parque.config;
 
+import com.parque.auth.model.InternalRole;
+import com.parque.auth.repository.InternalCredentialRepository;
 import com.parque.attraction.repository.AttractionRepository;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.CompanionRequest;
@@ -9,6 +11,7 @@ import com.parque.employee.repository.EmployeeRepository;
 import com.parque.entity.Attraction;
 import com.parque.entity.Employee;
 import com.parque.entity.Hotel;
+import com.parque.entity.InternalCredential;
 import com.parque.entity.Offer;
 import com.parque.entity.User;
 import com.parque.hotel.repository.HotelRepository;
@@ -20,9 +23,11 @@ import com.parque.shift.service.ShiftService;
 import com.parque.user.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -33,8 +38,18 @@ import java.util.List;
 @ConditionalOnProperty(prefix = "app.demo-data", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DemoDataConfig {
 
+    @Value("${app.demo-admin.username}")
+    private String demoAdminUsername;
+
+    @Value("${app.demo-admin.email}")
+    private String demoAdminEmail;
+
+    @Value("${app.demo-admin.password}")
+    private String demoAdminPassword;
+
     @Bean
     public CommandLineRunner demoDataInitializer(
+            InternalCredentialRepository internalCredentialRepository,
             UserRepository userRepository,
             HotelRepository hotelRepository,
             AttractionRepository attractionRepository,
@@ -43,9 +58,12 @@ public class DemoDataConfig {
             BookingRepository bookingRepository,
             BookingService bookingService,
             ShiftService shiftService,
-            MaintenanceService maintenanceService
+            MaintenanceService maintenanceService,
+            PasswordEncoder passwordEncoder
     ) {
         return args -> {
+            seedInternalCredential(internalCredentialRepository, passwordEncoder);
+
             if (userRepository.count() > 0 || hotelRepository.count() > 0 || bookingRepository.count() > 0) {
                 return;
             }
@@ -213,6 +231,23 @@ public class DemoDataConfig {
             shiftService.generate(new ShiftGenerateRequest(monthStart, monthEnd));
             maintenanceService.generate(new MaintenanceGenerateRequest(LocalDate.now(), LocalDate.now().plusDays(30)));
         };
+    }
+
+    private void seedInternalCredential(
+            InternalCredentialRepository internalCredentialRepository,
+            PasswordEncoder passwordEncoder
+    ) {
+        if (internalCredentialRepository.findByUsername(demoAdminUsername).isPresent()) {
+            return;
+        }
+
+        internalCredentialRepository.save(InternalCredential.builder()
+                .username(demoAdminUsername)
+                .email(demoAdminEmail)
+                .passwordHash(passwordEncoder.encode(demoAdminPassword))
+                .role(InternalRole.ADMIN)
+                .active(true)
+                .build());
     }
 
     private Employee employee(
