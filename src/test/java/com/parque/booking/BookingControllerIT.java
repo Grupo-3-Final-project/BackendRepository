@@ -26,7 +26,9 @@ import org.springframework.web.client.RestClient;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -81,7 +83,21 @@ class BookingControllerIT {
         ResponseEntity<String> response = postJson("/api/bookings", objectMapper.writeValueAsString(request));
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        assertThat(response.getHeaders().getContentType().toString()).startsWith("application/json");
         JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(fieldNames(body)).containsExactly(
+                "id",
+                "userId",
+                "userFullName",
+                "hotelId",
+                "hotelName",
+                "boardType",
+                "visitDate",
+                "tickets",
+                "totalPrice",
+                "emailSent",
+                "createdAt"
+        );
         assertThat(body.get("id").isNumber()).isTrue();
         assertThat(body.get("userId").asLong()).isEqualTo(user.getId());
         assertThat(body.get("userFullName").asText()).isEqualTo("David Navarro");
@@ -91,6 +107,14 @@ class BookingControllerIT {
         assertThat(body.get("visitDate").asText()).isEqualTo("2026-05-22");
         assertThat(body.get("tickets").isArray()).isTrue();
         assertThat(body.get("tickets").size()).isEqualTo(2);
+        assertThat(fieldNames(body.get("tickets").get(0))).containsExactly("holderFullName", "ageRange", "price");
+        assertThat(fieldNames(body.get("tickets").get(1))).containsExactly("holderFullName", "ageRange", "price");
+        assertThat(body.get("tickets").get(0).get("holderFullName").asText()).isEqualTo("Ana Garcia");
+        assertThat(body.get("tickets").get(0).get("ageRange").asText()).isEqualTo("ADULT");
+        assertThat(body.get("tickets").get(0).get("price").asDouble()).isEqualTo(45.0);
+        assertThat(body.get("tickets").get(1).get("holderFullName").asText()).isEqualTo("Lucas Garcia");
+        assertThat(body.get("tickets").get(1).get("ageRange").asText()).isEqualTo("CHILD");
+        assertThat(body.get("tickets").get(1).get("price").asDouble()).isEqualTo(25.0);
         assertThat(body.get("totalPrice").asDouble()).isEqualTo(190.0);
         assertThat(body.get("emailSent").asBoolean()).isTrue();
         assertThat(body.get("createdAt").asText()).isNotBlank();
@@ -115,11 +139,7 @@ class BookingControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         JsonNode body = objectMapper.readTree(response.getBody());
-        assertThat(body.get("status").asInt()).isEqualTo(400);
-        assertThat(body.get("error").asText()).isEqualTo("Bad Request");
-        assertThat(body.get("message").asText()).isEqualTo("Invalid booking data");
-        assertThat(body.get("path").asText()).isEqualTo("/api/bookings");
-        assertThat(body.get("timestamp").asText()).isNotBlank();
+        assertErrorContract(body, 400, "Bad Request", "Invalid booking data", "/api/bookings");
     }
 
     @Test
@@ -143,8 +163,7 @@ class BookingControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         JsonNode body = objectMapper.readTree(response.getBody());
-        assertThat(body.get("message").asText()).isEqualTo("Hotel is full");
-        assertThat(body.get("path").asText()).isEqualTo("/api/bookings");
+        assertErrorContract(body, 409, "Conflict", "Hotel is full", "/api/bookings");
     }
 
     @Test
@@ -164,8 +183,47 @@ class BookingControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
         JsonNode body = objectMapper.readTree(response.getBody());
-        assertThat(body.get("message").asText()).isEqualTo("A minor cannot travel without an adult");
-        assertThat(body.get("path").asText()).isEqualTo("/api/bookings");
+        assertErrorContract(body, 409, "Conflict", "A minor cannot travel without an adult", "/api/bookings");
+    }
+
+    @Test
+    void postBookings_shouldReturn404WithApiError_whenUserNotFound() throws Exception {
+        Hotel hotel = saveHotel(4);
+
+        BookingCreateRequest request = new BookingCreateRequest(
+                999L,
+                null,
+                hotel.getId(),
+                "FULL_BOARD",
+                LocalDate.parse("2026-05-22"),
+                List.of(new CompanionRequest("Ana", "Garcia", LocalDate.parse("1988-03-10")))
+        );
+
+        ResponseEntity<String> response = postJson("/api/bookings", objectMapper.writeValueAsString(request));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertErrorContract(body, 404, "Not Found", "User not found", "/api/bookings");
+    }
+
+    @Test
+    void postBookings_shouldReturn404WithApiError_whenHotelNotFound() throws Exception {
+        User user = saveUser("david@example.com", "12345678A");
+
+        BookingCreateRequest request = new BookingCreateRequest(
+                user.getId(),
+                null,
+                999L,
+                "FULL_BOARD",
+                LocalDate.parse("2026-05-22"),
+                List.of(new CompanionRequest("Ana", "Garcia", LocalDate.parse("1988-03-10")))
+        );
+
+        ResponseEntity<String> response = postJson("/api/bookings", objectMapper.writeValueAsString(request));
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertErrorContract(body, 404, "Not Found", "Hotel not found", "/api/bookings");
     }
 
     @Test
@@ -194,9 +252,19 @@ class BookingControllerIT {
                 .toEntity(String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType().toString()).startsWith("application/json");
         JsonNode body = objectMapper.readTree(response.getBody());
         assertThat(body.isArray()).isTrue();
         assertThat(body).hasSize(1);
+        assertThat(fieldNames(body.get(0))).containsExactly(
+                "id",
+                "userFullName",
+                "hotelName",
+                "visitDate",
+                "totalTickets",
+                "totalPrice",
+                "createdAt"
+        );
         assertThat(body.get(0).get("userFullName").asText()).isEqualTo("David Navarro");
         assertThat(body.get(0).get("hotelName").asText()).isEqualTo("Hotel Magic Park");
         assertThat(body.get(0).get("visitDate").asText()).isEqualTo("2026-05-22");
@@ -232,11 +300,35 @@ class BookingControllerIT {
                 .toEntity(String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getHeaders().getContentType().toString()).startsWith("application/json");
         JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(fieldNames(body)).containsExactly(
+                "id",
+                "userId",
+                "userFullName",
+                "hotelId",
+                "hotelName",
+                "boardType",
+                "visitDate",
+                "tickets",
+                "totalPrice",
+                "emailSent",
+                "createdAt"
+        );
         assertThat(body.get("id").asLong()).isEqualTo(bookingId);
+        assertThat(body.get("userId").asLong()).isEqualTo(user.getId());
+        assertThat(body.get("userFullName").asText()).isEqualTo("David Navarro");
+        assertThat(body.get("hotelId").asLong()).isEqualTo(hotel.getId());
+        assertThat(body.get("hotelName").asText()).isEqualTo("Hotel Magic Park");
+        assertThat(body.get("boardType").asText()).isEqualTo("FULL_BOARD");
+        assertThat(body.get("visitDate").asText()).isEqualTo("2026-05-22");
         assertThat(body.get("tickets").isArray()).isTrue();
         assertThat(body.get("tickets").size()).isEqualTo(2);
+        assertThat(fieldNames(body.get("tickets").get(0))).containsExactly("holderFullName", "ageRange", "price");
+        assertThat(fieldNames(body.get("tickets").get(1))).containsExactly("holderFullName", "ageRange", "price");
         assertThat(body.get("totalPrice").asDouble()).isEqualTo(190.0);
+        assertThat(body.get("emailSent").asBoolean()).isTrue();
+        assertThat(body.get("createdAt").asText()).isNotBlank();
     }
 
     @Test
@@ -249,11 +341,7 @@ class BookingControllerIT {
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         JsonNode body = objectMapper.readTree(response.getBody());
-        assertThat(body.get("status").asInt()).isEqualTo(404);
-        assertThat(body.get("error").asText()).isEqualTo("Not Found");
-        assertThat(body.get("message").asText()).isEqualTo("Booking not found");
-        assertThat(body.get("path").asText()).isEqualTo("/api/bookings/999");
-        assertThat(body.get("timestamp").asText()).isNotBlank();
+        assertErrorContract(body, 404, "Not Found", "Booking not found", "/api/bookings/999");
     }
 
     private ResponseEntity<String> postJson(String path, String body) {
@@ -274,6 +362,21 @@ class BookingControllerIT {
                 .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
                 })
                 .build();
+    }
+
+    private void assertErrorContract(JsonNode body, int status, String error, String message, String path) {
+        assertThat(fieldNames(body)).containsExactly("status", "error", "message", "path", "timestamp");
+        assertThat(body.get("status").asInt()).isEqualTo(status);
+        assertThat(body.get("error").asText()).isEqualTo(error);
+        assertThat(body.get("message").asText()).isEqualTo(message);
+        assertThat(body.get("path").asText()).isEqualTo(path);
+        assertThat(body.get("timestamp").asText()).isNotBlank();
+    }
+
+    private List<String> fieldNames(JsonNode node) {
+        Set<String> fieldNames = new LinkedHashSet<>();
+        node.fieldNames().forEachRemaining(fieldNames::add);
+        return fieldNames.stream().toList();
     }
 
     private User saveUser(String email, String dni) {

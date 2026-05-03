@@ -133,6 +133,20 @@ class BookingServiceTest {
     }
 
     @Test
+    void create_shouldThrowNotFound_whenHotelDoesNotExist() {
+        User user = saveUser("david@example.com", "12345678A");
+
+        assertThatThrownBy(() -> bookingService.create(new BookingCreateRequest(
+                user.getId(),
+                null,
+                999L,
+                "FULL_BOARD",
+                LocalDate.parse("2026-05-22"),
+                List.of(new CompanionRequest("Ana", "Garcia", LocalDate.parse("1988-03-10")))
+        ))).isInstanceOf(ResourceNotFoundException.class).hasMessage("Hotel not found");
+    }
+
+    @Test
     void getById_shouldThrowNotFound_whenBookingDoesNotExist() {
         assertThatThrownBy(() -> bookingService.getById(999L))
                 .isInstanceOf(ResourceNotFoundException.class)
