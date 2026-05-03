@@ -13,10 +13,17 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Transactional(readOnly = true)
 public class DashboardServiceImpl implements DashboardService {
+
+    private static final Map<String, Integer> AGE_RANGE_ORDER = Map.of(
+            "CHILD", 0,
+            "ADULT", 1,
+            "SENIOR", 2
+    );
 
     private final TicketRepository ticketRepository;
     private final BookingDashboardRepository bookingDashboardRepository;
@@ -31,7 +38,7 @@ public class DashboardServiceImpl implements DashboardService {
         List<Object[]> rows = ticketRepository.countTicketsByAgeRange(year);
         return rows.stream()
                 .map(r -> new TicketsByAgeRangeResponse((String) r[0], (Long) r[1]))
-                .sorted(Comparator.comparing(TicketsByAgeRangeResponse::ageRange))
+                .sorted(Comparator.comparing(response -> AGE_RANGE_ORDER.getOrDefault(response.ageRange(), Integer.MAX_VALUE)))
                 .toList();
     }
 
