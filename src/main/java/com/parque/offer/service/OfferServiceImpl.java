@@ -1,7 +1,8 @@
 package com.parque.offer.service;
 
-import com.parque.entity.Hotel;
+
 import com.parque.exception.ResourceNotFoundException;
+import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.dto.OfferCreateRequest;
 import com.parque.offer.dto.OfferResponse;
