@@ -3,7 +3,7 @@ package com.parque.offer;
 import com.parque.auth.repository.InternalCredentialRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.parque.entity.Hotel;
+import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.dto.OfferCreateRequest;
 import com.parque.offer.repository.OfferRepository;
