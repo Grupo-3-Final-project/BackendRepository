@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.parque.booking.model.Booking;
+import com.parque.hotel.model.Hotel;
 
 @Entity
 @Table(name = "offers")
