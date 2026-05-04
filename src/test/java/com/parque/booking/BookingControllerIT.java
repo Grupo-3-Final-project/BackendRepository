@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.repository.BookingRepository;
-import com.parque.entity.Hotel;
+import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.repository.OfferRepository;
 import com.parque.testconfig.JacksonTestConfig;
