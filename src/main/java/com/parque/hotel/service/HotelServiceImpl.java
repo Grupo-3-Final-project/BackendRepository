@@ -1,10 +1,10 @@
 package com.parque.hotel.service;
 
-import com.parque.entity.Hotel;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.hotel.dto.HotelCreateRequest;
 import com.parque.hotel.dto.HotelResponse;
 import com.parque.hotel.dto.HotelUpdateRequest;
+import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
