@@ -1,4 +1,4 @@
-package com.parque.entity;
+package com.parque.hotel.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import com.parque.booking.model.Booking;
+import com.parque.offer.model.Offer;
 
 @Entity
 @Table(name = "hotels")

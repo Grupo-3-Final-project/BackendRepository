@@ -14,7 +14,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import com.parque.entity.Hotel;
+import com.parque.entity.Ticket;
+import com.parque.hotel.model.Hotel;
 import com.parque.offer.model.Offer;
 import com.parque.user.model.User;
 

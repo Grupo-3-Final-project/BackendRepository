@@ -6,6 +6,8 @@ import com.parque.hotel.dto.HotelCreateRequest;
 import com.parque.hotel.dto.HotelResponse;
 import com.parque.hotel.dto.HotelUpdateRequest;
 import com.parque.hotel.repository.HotelRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,17 +17,21 @@ import java.util.List;
 @Transactional
 public class HotelServiceImpl implements HotelService {
 
-    private final HotelRepository hotelRepository;
-
+    @Autowired
     public HotelServiceImpl(HotelRepository hotelRepository) {
         this.hotelRepository = hotelRepository;
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<HotelResponse> getAll() {
-        return hotelRepository.findAll().stream().map(this::toResponse).toList();
-    }
+    private final HotelRepository hotelRepository;
+
+@Override
+@Transactional(readOnly = true)
+public List<HotelResponse> getAll() {
+    return hotelRepository.findAll()
+            .stream()
+            .map(this::toResponse)
+            .toList();
+}
 
     @Override
     @Transactional(readOnly = true)
