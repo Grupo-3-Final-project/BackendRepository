@@ -1,7 +1,8 @@
 package com.parque.user.repository;
 
-import com.parque.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.parque.user.model.User;
 
 import java.util.Optional;
 

@@ -1,11 +1,11 @@
 package com.parque.offer.service;
 
 import com.parque.entity.Hotel;
-import com.parque.entity.Offer;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.dto.OfferCreateRequest;
 import com.parque.offer.dto.OfferResponse;
+import com.parque.offer.model.Offer;
 import com.parque.offer.repository.OfferRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

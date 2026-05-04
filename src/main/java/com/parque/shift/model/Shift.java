@@ -1,4 +1,4 @@
-package com.parque.entity;
+package com.parque.shift.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+
+import com.parque.employee.model.Employee;
 
 @Entity
 @Table(name = "shifts")

@@ -1,4 +1,4 @@
-package com.parque.entity;
+package com.parque.user.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.parque.booking.model.Booking;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

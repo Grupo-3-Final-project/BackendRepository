@@ -1,4 +1,4 @@
-package com.parque.entity;
+package com.parque.attraction.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -7,46 +7,49 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.util.List;
 
+import com.parque.maintenance.model.Maintenance;
+
 @Entity
-@Table(name = "offers")
+@Table(name = "attractions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Offer {
+public class Attraction {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
-    private String title;
+    private String name;
 
     @NotBlank
     private String description;
 
-    @NotNull
-    @ManyToOne
-    @JoinColumn(name = "hotel_id", nullable = false)
-    private Hotel hotel;
+    @NotBlank
+    private String size;
 
     @NotBlank
-    private String boardType;
+    private String status;
 
     @NotNull
     @Positive
-    private Integer includedTickets;
+    private Integer totalSeats;
+
+    @NotNull
+    @PositiveOrZero
+    private Integer availableSeats;
 
     @NotNull
     @Positive
-    private BigDecimal totalPrice;
+    private Integer maintenanceFrequencyDays;
 
     @NotBlank
     private String imageUrl;
 
-    @OneToMany(mappedBy = "offer", cascade = CascadeType.REMOVE)
-    private List<Booking> bookings;
+    @OneToMany(mappedBy = "attraction", cascade = CascadeType.REMOVE)
+    private List<Maintenance> maintenances;
 }

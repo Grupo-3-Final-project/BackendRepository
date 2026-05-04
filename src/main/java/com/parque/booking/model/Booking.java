@@ -1,4 +1,4 @@
-package com.parque.entity;
+package com.parque.booking.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -13,6 +13,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.hibernate.annotations.UpdateTimestamp;
+
+import com.parque.entity.Hotel;
+import com.parque.offer.model.Offer;
+import com.parque.user.model.User;
 
 @Entity
 @Table(name = "bookings")

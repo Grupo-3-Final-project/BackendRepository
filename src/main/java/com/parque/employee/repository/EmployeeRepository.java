@@ -1,7 +1,8 @@
 package com.parque.employee.repository;
 
-import com.parque.entity.Employee;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.parque.employee.model.Employee;
 
 import java.util.Optional;
 

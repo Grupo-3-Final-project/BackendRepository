@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.parque.booking.model.Booking;
+
 @Entity
 @Table(name = "hotels")
 @Data

@@ -1,4 +1,4 @@
-package com.parque.entity;
+package com.parque.employee.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+
+import com.parque.maintenance.model.Maintenance;
+import com.parque.shift.model.Shift;
 
 @Entity
 @Table(name = "employees")

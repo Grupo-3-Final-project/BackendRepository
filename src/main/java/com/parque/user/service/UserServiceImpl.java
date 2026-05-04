@@ -1,11 +1,11 @@
 package com.parque.user.service;
 
-import com.parque.entity.User;
 import com.parque.exception.ConflictException;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.user.dto.UserCreateRequest;
 import com.parque.user.dto.UserResponse;
 import com.parque.user.dto.UserUpdateRequest;
+import com.parque.user.model.User;
 import com.parque.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

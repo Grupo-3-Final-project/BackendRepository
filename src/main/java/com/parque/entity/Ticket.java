@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+import com.parque.booking.model.Booking;
+
 @Entity
 @Table(name = "tickets")
 @Data

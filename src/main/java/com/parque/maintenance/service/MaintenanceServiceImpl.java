@@ -1,15 +1,15 @@
 package com.parque.maintenance.service;
 
+import com.parque.attraction.model.Attraction;
 import com.parque.attraction.repository.AttractionRepository;
+import com.parque.employee.model.Employee;
 import com.parque.employee.repository.EmployeeRepository;
-import com.parque.entity.Attraction;
-import com.parque.entity.Employee;
-import com.parque.entity.Maintenance;
 import com.parque.exception.ConflictException;
 import com.parque.maintenance.dto.MaintenanceGenerateRequest;
 import com.parque.maintenance.dto.MaintenanceGenerateResponse;
 import com.parque.maintenance.dto.MaintenanceResponse;
 import com.parque.maintenance.dto.MaintenanceTechnicianResponse;
+import com.parque.maintenance.model.Maintenance;
 import com.parque.maintenance.repository.MaintenanceRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

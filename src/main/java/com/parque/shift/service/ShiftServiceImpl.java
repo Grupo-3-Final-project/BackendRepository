@@ -1,12 +1,12 @@
 package com.parque.shift.service;
 
+import com.parque.employee.model.Employee;
 import com.parque.employee.repository.EmployeeRepository;
-import com.parque.entity.Employee;
-import com.parque.entity.Shift;
 import com.parque.exception.ConflictException;
 import com.parque.shift.dto.ShiftGenerateRequest;
 import com.parque.shift.dto.ShiftGenerateResponse;
 import com.parque.shift.dto.ShiftResponse;
+import com.parque.shift.model.Shift;
 import com.parque.shift.repository.ShiftRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

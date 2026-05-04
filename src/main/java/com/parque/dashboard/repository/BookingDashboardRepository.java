@@ -1,9 +1,10 @@
 package com.parque.dashboard.repository;
 
-import com.parque.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+
+import com.parque.booking.model.Booking;
 
 import java.math.BigDecimal;
 import java.util.List;

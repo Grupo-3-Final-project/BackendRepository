@@ -1,8 +1,9 @@
 package com.parque.booking.repository;
 
-import com.parque.entity.Booking;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.parque.booking.model.Booking;
 
 import java.util.List;
 import java.util.Optional;

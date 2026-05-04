@@ -1,7 +1,8 @@
 package com.parque.shift.repository;
 
-import com.parque.entity.Shift;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.parque.shift.model.Shift;
 
 import java.time.LocalDate;
 import java.util.List;
