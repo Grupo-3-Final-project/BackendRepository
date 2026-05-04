@@ -34,7 +34,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Configuration
-@Profile("dev")
+@Profile({"dev", "e2e"})
 @ConditionalOnProperty(prefix = "app.demo-data", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class DemoDataConfig {
 
