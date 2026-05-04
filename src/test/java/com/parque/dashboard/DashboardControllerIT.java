@@ -7,7 +7,7 @@ import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.dashboard.repository.BookingDashboardRepository;
 import com.parque.dashboard.repository.TicketRepository;
-import com.parque.entity.Hotel;
+import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.testconfig.JacksonTestConfig;
 import com.parque.testsupport.InternalAuthSupport;
