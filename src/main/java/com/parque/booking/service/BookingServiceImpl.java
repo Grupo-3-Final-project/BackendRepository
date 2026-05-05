@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -267,4 +268,19 @@ public class BookingServiceImpl implements BookingService {
     public PaymentStatus SetBookStatus(PaymentStatus Status) {
         return this.SetBookStatus(Status);
     }
+
+    public ArrayList<String> AddParticipantsToBok(ArrayList<String> emailsParticipants, Booking book) {
+        book.getEmailsParticipants().addAll(emailsParticipants);
+        return book.getEmailsParticipants();
+    }
+
+    public boolean ChangeStatus(PaymentStatus status, Booking book) {
+        if (status.equals(book.getPayment().getStatus())) {
+            return false;
+        }
+        book.getPayment().setStatus(status);
+        return true;
+    }
+
+    
 }

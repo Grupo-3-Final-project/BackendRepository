@@ -16,4 +16,6 @@ public interface BookingService {
     BookingResponse getById(Long id);
 
     PaymentStatus SetBookStatus(PaymentStatus Status);
+
+    public boolean ChangeStatus(BookingResponse book, PaymentStatus status);
 }

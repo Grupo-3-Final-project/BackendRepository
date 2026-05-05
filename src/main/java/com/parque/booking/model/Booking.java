@@ -11,12 +11,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.parque.entity.Ticket;
 import com.parque.hotel.model.Hotel;
 import com.parque.offer.model.Offer;
+import com.parque.payment.Payment;
 import com.parque.user.model.User;
 
 @Entity
@@ -65,4 +67,9 @@ public class Booking {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    private Payment payment;
+
+    ArrayList<String> emailsParticipants;
 }
