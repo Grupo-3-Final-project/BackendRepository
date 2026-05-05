@@ -8,6 +8,7 @@ import com.parque.booking.dto.TicketResponse;
 import com.parque.booking.model.Booking;
 import com.parque.booking.repository.BookingRepository;
 import com.parque.entity.Ticket;
+import com.parque.enums.PaymentStatus;
 import com.parque.exception.ConflictException;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.hotel.model.Hotel;
@@ -260,5 +261,10 @@ public class BookingServiceImpl implements BookingService {
 
     private String fullName(String firstName, String lastName) {
         return firstName + " " + lastName;
+    }
+
+    @Override
+    public PaymentStatus SetBookStatus(PaymentStatus Status) {
+        return this.SetBookStatus(Status);
     }
 }
