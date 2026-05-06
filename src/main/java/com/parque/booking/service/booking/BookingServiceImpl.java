@@ -8,7 +8,6 @@ import com.parque.booking.dto.TicketResponse;
 import com.parque.booking.model.Booking;
 import com.parque.booking.repository.BookingRepository;
 import com.parque.entity.Ticket;
-import com.parque.enums.PaymentStatus;
 import com.parque.exception.ConflictException;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.hotel.model.Hotel;
@@ -18,8 +17,6 @@ import com.parque.offer.repository.OfferRepository;
 import com.parque.user.model.User;
 import com.parque.user.repository.UserRepository;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
