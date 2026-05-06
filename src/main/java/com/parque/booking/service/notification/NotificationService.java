@@ -25,7 +25,7 @@ public class NotificationService {
         String body = buildBody(booking);
 
         emails.forEach(email ->
-                mailSender.send(email, subject, body)
+                mailSender.sendEmail(email, subject, body)
         );
     }
 

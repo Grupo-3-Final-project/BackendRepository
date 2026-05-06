@@ -4,10 +4,10 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 
 public class MailSender {
-    private final JavaMailSender mailSender;
+    private final JavaMailSender javaMailSender;
 
-    public MailSender(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
+    public MailSender(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
     }
 
     public void sendEmail(String to, String subject, String text) {
@@ -15,6 +15,6 @@ public class MailSender {
         message.setTo(to);
         message.setSubject(subject);
         message.setText(text);
-        mailSender.send(message);
+        javaMailSender.send(message);
     }
 }
