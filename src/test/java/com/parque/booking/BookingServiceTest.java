@@ -5,6 +5,7 @@ import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.repository.BookingRepository;
 import com.parque.booking.service.booking.BookingService;
+import com.parque.booking.service.notification.NotificationService;
 import com.parque.exception.ConflictException;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.hotel.model.Hotel;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -24,6 +26,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 @SpringBootTest
 @Transactional
@@ -43,6 +47,9 @@ class BookingServiceTest {
 
     @Autowired
     private OfferRepository offerRepository;
+
+    @MockitoBean
+    private NotificationService notificationService;
 
     @BeforeEach
     void setUp() {
@@ -81,6 +88,8 @@ class BookingServiceTest {
         assertThat(created.totalPrice()).isEqualByComparingTo("190.00");
         assertThat(created.emailSent()).isTrue();
         assertThat(created.createdAt()).isNotNull();
+
+        verify(notificationService).sendBookingConfirmation(eq(List.of("david@example.com")), eq(created));
 
         Hotel updatedHotel = hotelRepository.findById(hotel.getId()).orElseThrow();
         assertThat(updatedHotel.getAvailablePlaces()).isEqualTo(2);

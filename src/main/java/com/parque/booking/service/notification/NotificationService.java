@@ -18,7 +18,6 @@ public class NotificationService {
     }
 
     public void sendBookingConfirmation(List<String> emails, BookingResponse booking) {
-
         if (booking == null) {
             return;
         }
@@ -27,7 +26,7 @@ public class NotificationService {
             return;
         }
 
-        String subject = "Confirmación de reserva - La Última Puerta";
+        String subject = "Confirmacion de reserva - La Ultima Puerta";
         String body = buildBody(booking);
 
         emails.stream()
@@ -39,11 +38,11 @@ public class NotificationService {
         return """
                 Tu reserva se ha realizado correctamente.
 
-                Número de reserva: %s
+                Numero de reserva: %s
                 Fecha de visita: %s
                 Hotel: %s
-                Tipo de pensión: %s
-                Precio total: %s €
+                Tipo de pension: %s
+                Precio total: %s EUR
                 """.formatted(
                 booking.id(),
                 booking.visitDate(),
