@@ -19,10 +19,12 @@ import com.parque.user.model.User;
 import com.parque.user.repository.UserRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -313,7 +315,7 @@ public class BookingServiceImpl implements BookingService {
             log.info("Email enviado a: {}", email);
         } catch (Exception e) {
             log.error("Error enviando email a {}", email, e);
-            throw e;
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error enviando email a " + email);
         }
     }
 
