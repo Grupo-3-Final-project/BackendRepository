@@ -270,28 +270,11 @@ public class BookingServiceImpl implements BookingService {
         return firstName + " " + lastName;
     }
 
-    @Override
-    public PaymentStatus SetBookStatus(Booking booking, PaymentStatus status) {
-        booking.getPayment().setStatus(status);
-
-        bookingRepository.save(booking);
-
-        return booking.getPayment().getStatus();
-    }
 
     public ArrayList<String> AddParticipantsToBok(ArrayList<String> emailsParticipants, Booking book) {
         book.getEmailsParticipants().addAll(emailsParticipants);
         return book.getEmailsParticipants();
     }
-
-    public boolean ChangeStatus(PaymentStatus status, Booking book) {
-        if (status.equals(book.getPayment().getStatus())) {
-            return false;
-        }
-        book.getPayment().setStatus(status);
-        return true;
-    }
-
 
 
 
@@ -315,28 +298,5 @@ public class BookingServiceImpl implements BookingService {
             throw e;
         }
     }
-
-    private SimpleMailMessage buildMessage(String email, Booking booking) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(email);
-        message.setSubject("Confirmación de reserva - La Última Puerta");
-        message.setText("""
-                Tu reserva se ha realizado correctamente.
-
-                Número de reserva: %s
-                Fecha de visita: %s
-                Hotel: %s
-                Tipo de pensión: %s
-                Precio total: %s €
-                """.formatted(
-                booking.getId(),
-                booking.getVisitDate(),
-                booking.getHotel() == null ? "Sin hotel" : booking.getHotel().getName(),
-                booking.getBoardType() == null ? "Sin pensión" : booking.getBoardType(),
-                booking.getTotalPrice()
-        ));
-        return message;
-    }
-
 
 }

@@ -18,7 +18,6 @@ import org.hibernate.annotations.UpdateTimestamp;
 import com.parque.entity.Ticket;
 import com.parque.hotel.model.Hotel;
 import com.parque.offer.model.Offer;
-import com.parque.payment.Payment;
 import com.parque.user.model.User;
 
 @Entity
