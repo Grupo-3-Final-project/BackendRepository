@@ -3,7 +3,8 @@ package com.parque.booking.controller;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.BookingSummaryResponse;
-import com.parque.booking.service.BookingService;
+import com.parque.booking.service.booking.BookingService;
+
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -4,7 +4,7 @@ import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.repository.BookingRepository;
-import com.parque.booking.service.BookingService;
+import com.parque.booking.service.booking.BookingService;
 import com.parque.exception.ConflictException;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.hotel.model.Hotel;
