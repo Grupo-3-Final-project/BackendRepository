@@ -16,8 +16,4 @@ public interface BookingService {
     List<BookingSummaryResponse> getAll();
 
     BookingResponse getById(Long id);
-
-    void sendEmails(Booking booking);
-
-    PaymentStatus SetBookStatus(Booking booking, PaymentStatus status);
 }
