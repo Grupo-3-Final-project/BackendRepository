@@ -1,11 +1,14 @@
 package com.parque.booking.service.notification;
 
 import com.parque.booking.dto.BookingResponse;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@ConditionalOnBean(JavaMailSender.class)
 public class NotificationService {
 
     private final MailSender mailSender;
