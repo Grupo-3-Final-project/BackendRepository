@@ -1,8 +1,9 @@
 package com.parque.auth.controller;
 
 import com.parque.auth.service.InternalAuthService;
-import com.parque.security.dto.LoginRequest;
-import com.parque.security.dto.LoginResponse;
+import com.parque.security.filter.dto.LoginRequest;
+import com.parque.security.filter.dto.LoginResponse;
+
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

@@ -4,8 +4,9 @@ import com.parque.auth.repository.InternalCredentialRepository;
 import com.parque.entity.InternalCredential;
 import com.parque.exception.UnauthorizedException;
 import com.parque.security.JwtProvider;
-import com.parque.security.dto.LoginRequest;
-import com.parque.security.dto.LoginResponse;
+import com.parque.security.filter.dto.LoginRequest;
+import com.parque.security.filter.dto.LoginResponse;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
