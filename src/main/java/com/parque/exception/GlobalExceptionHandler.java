@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleResourceNotFound(
+    public ResponseEntity<ErrorResponseDTO> handleResourceNotFound(
             ResourceNotFoundException ex,
             HttpServletRequest request
     ) {
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ConflictException.class)
-    public ResponseEntity<ApiErrorResponse> handleConflict(
+    public ResponseEntity<ErrorResponseDTO> handleConflict(
             ConflictException ex,
             HttpServletRequest request
     ) {
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleValidation(
+    public ResponseEntity<ErrorResponseDTO> handleValidation(
             MethodArgumentNotValidException ex,
             HttpServletRequest request
     ) {
@@ -39,7 +39,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotReadable(
+    public ResponseEntity<ErrorResponseDTO> handleNotReadable(
             HttpMessageNotReadableException ex,
             HttpServletRequest request
     ) {
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<ApiErrorResponse> handleDataIntegrityViolation(
+    public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolation(
             DataIntegrityViolationException ex,
             HttpServletRequest request
     ) {
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
+    public ResponseEntity<ErrorResponseDTO> handleIllegalArgument(
             IllegalArgumentException ex,
             HttpServletRequest request
     ) {
@@ -63,7 +63,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ApiErrorResponse> handleUnauthorized(
+    public ResponseEntity<ErrorResponseDTO> handleUnauthorized(
             UnauthorizedException ex,
             HttpServletRequest request
     ) {
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleUnexpected(
+    public ResponseEntity<ErrorResponseDTO> handleUnexpected(
             Exception ex,
             HttpServletRequest request
     ) {
@@ -79,15 +79,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InternalServerErrorException.class)
-    public ResponseEntity<ApiErrorResponse> handleInternalServer(
+    public ResponseEntity<ErrorResponseDTO> handleInternalServer(
             InternalServerErrorException ex,
             HttpServletRequest request
     ) {
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage(), request.getRequestURI());
     }
 
-    private ResponseEntity<ApiErrorResponse> buildErrorResponse(HttpStatus status, String message, String path) {
-        ApiErrorResponse response = new ApiErrorResponse(
+    private ResponseEntity<ErrorResponseDTO> buildErrorResponse(HttpStatus status, String message, String path) {
+        ErrorResponseDTO response = new ErrorResponseDTO(
                 status.value(),
                 status.getReasonPhrase(),
                 message,
