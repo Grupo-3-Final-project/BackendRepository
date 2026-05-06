@@ -16,17 +16,20 @@ public class NotificationService {
 
     public void sendBookingConfirmation(List<String> emails, BookingResponse booking) {
 
+        if (booking == null) {
+            return;
+        }
+
         if (emails == null || emails.isEmpty()) {
             return;
         }
 
         String subject = "Confirmación de reserva - La Última Puerta";
-
         String body = buildBody(booking);
 
-        emails.forEach(email ->
-                mailSender.sendEmail(email, subject, body)
-        );
+        emails.stream()
+                .filter(email -> email != null && !email.isBlank())
+                .forEach(email -> mailSender.sendEmail(email, subject, body));
     }
 
     private String buildBody(BookingResponse booking) {
@@ -43,7 +46,6 @@ public class NotificationService {
                 booking.visitDate(),
                 booking.hotelName() == null ? "Sin hotel" : booking.hotelName(),
                 booking.boardType(),
-                booking.totalPrice()
-        );
+                booking.totalPrice());
     }
 }
