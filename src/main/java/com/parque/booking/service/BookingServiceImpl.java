@@ -17,6 +17,10 @@ import com.parque.offer.model.Offer;
 import com.parque.offer.repository.OfferRepository;
 import com.parque.user.model.User;
 import com.parque.user.repository.UserRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,9 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
@@ -37,17 +44,20 @@ public class BookingServiceImpl implements BookingService {
     private static final BigDecimal ADULT_PRICE = new BigDecimal("45.00");
     private static final BigDecimal SENIOR_PRICE = new BigDecimal("30.00");
 
+    private final JavaMailSender mailSender;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final HotelRepository hotelRepository;
     private final OfferRepository offerRepository;
 
+    private static final Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
+
     public BookingServiceImpl(
             BookingRepository bookingRepository,
             UserRepository userRepository,
             HotelRepository hotelRepository,
-            OfferRepository offerRepository
-    ) {
+            OfferRepository offerRepository) {
+        this.mailSender = null;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.hotelRepository = hotelRepository;
@@ -226,20 +236,18 @@ public class BookingServiceImpl implements BookingService {
                 booking.getVisitDate(),
                 booking.getTickets() == null ? 0 : booking.getTickets().size(),
                 booking.getTotalPrice(),
-                normalizeCreatedAt(booking.getCreatedAt())
-        );
+                normalizeCreatedAt(booking.getCreatedAt()));
     }
 
     private BookingResponse toResponse(Booking booking) {
         List<TicketResponse> tickets = booking.getTickets() == null
                 ? List.of()
                 : booking.getTickets().stream()
-                .map(ticket -> new TicketResponse(
-                        ticket.getHolderFullName(),
-                        ticket.getAgeRange(),
-                        ticket.getPrice()
-                ))
-                .toList();
+                        .map(ticket -> new TicketResponse(
+                                ticket.getHolderFullName(),
+                                ticket.getAgeRange(),
+                                ticket.getPrice()))
+                        .toList();
 
         return new BookingResponse(
                 booking.getId(),
@@ -252,8 +260,7 @@ public class BookingServiceImpl implements BookingService {
                 tickets,
                 booking.getTotalPrice(),
                 booking.getEmailSent(),
-                normalizeCreatedAt(booking.getCreatedAt())
-        );
+                normalizeCreatedAt(booking.getCreatedAt()));
     }
 
     private LocalDateTime normalizeCreatedAt(LocalDateTime createdAt) {
@@ -265,8 +272,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public PaymentStatus SetBookStatus(PaymentStatus Status) {
-        return this.SetBookStatus(Status);
+    public PaymentStatus SetBookStatus(Booking booking, PaymentStatus status) {
+        booking.getPayment().setStatus(status);
+
+        bookingRepository.save(booking);
+
+        return booking.getPayment().getStatus();
     }
 
     public ArrayList<String> AddParticipantsToBok(ArrayList<String> emailsParticipants, Booking book) {
@@ -282,5 +293,51 @@ public class BookingServiceImpl implements BookingService {
         return true;
     }
 
-    
+
+
+
+   @Override
+    public void sendEmails(Booking booking) {
+        if (booking.getEmailsParticipants() == null || booking.getEmailsParticipants().isEmpty()) {
+            log.warn("No hay destinatarios para la reserva {}", booking.getId());
+            return;
+        }
+
+        booking.getEmailsParticipants().forEach(email -> sendEmail(email, booking));
+    }
+
+    private void sendEmail(String email, Booking booking) {
+        try {
+            SimpleMailMessage message = buildMessage(email, booking);
+            mailSender.send(message);
+            log.info("Email enviado a: {}", email);
+        } catch (Exception e) {
+            log.error("Error enviando email a {}", email, e);
+            throw e;
+        }
+    }
+
+    private SimpleMailMessage buildMessage(String email, Booking booking) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(email);
+        message.setSubject("Confirmación de reserva - La Última Puerta");
+        message.setText("""
+                Tu reserva se ha realizado correctamente.
+
+                Número de reserva: %s
+                Fecha de visita: %s
+                Hotel: %s
+                Tipo de pensión: %s
+                Precio total: %s €
+                """.formatted(
+                booking.getId(),
+                booking.getVisitDate(),
+                booking.getHotel() == null ? "Sin hotel" : booking.getHotel().getName(),
+                booking.getBoardType() == null ? "Sin pensión" : booking.getBoardType(),
+                booking.getTotalPrice()
+        ));
+        return message;
+    }
+
+
 }

@@ -3,9 +3,11 @@ package com.parque.booking.service;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.BookingSummaryResponse;
+import com.parque.booking.model.Booking;
 import com.parque.enums.PaymentStatus;
 
 import java.util.List;
+
 
 public interface BookingService {
 
@@ -15,5 +17,7 @@ public interface BookingService {
 
     BookingResponse getById(Long id);
 
-    PaymentStatus SetBookStatus(PaymentStatus Status);
+    void sendEmails(Booking booking);
+
+    PaymentStatus SetBookStatus(Booking booking, PaymentStatus status);
 }
