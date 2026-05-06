@@ -43,7 +43,6 @@ public class BookingServiceImpl implements BookingService {
     private static final BigDecimal ADULT_PRICE = new BigDecimal("45.00");
     private static final BigDecimal SENIOR_PRICE = new BigDecimal("30.00");
 
-    private final JavaMailSender mailSender;
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
     private final HotelRepository hotelRepository;
@@ -56,7 +55,6 @@ public class BookingServiceImpl implements BookingService {
             UserRepository userRepository,
             HotelRepository hotelRepository,
             OfferRepository offerRepository) {
-        this.mailSender = null;
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.hotelRepository = hotelRepository;
@@ -277,26 +275,5 @@ public class BookingServiceImpl implements BookingService {
     }
 
 
-
-   @Override
-    public void sendEmails(Booking booking) {
-        if (booking.getEmailsParticipants() == null || booking.getEmailsParticipants().isEmpty()) {
-            log.warn("No hay destinatarios para la reserva {}", booking.getId());
-            return;
-        }
-
-        booking.getEmailsParticipants().forEach(email -> sendEmail(email, booking));
-    }
-
-    private void sendEmail(String email, Booking booking) {
-        try {
-            SimpleMailMessage message = buildMessage(email, booking);
-            mailSender.send(message);
-            log.info("Email enviado a: {}", email);
-        } catch (Exception e) {
-            log.error("Error enviando email a {}", email, e);
-            throw e;
-        }
-    }
 
 }
