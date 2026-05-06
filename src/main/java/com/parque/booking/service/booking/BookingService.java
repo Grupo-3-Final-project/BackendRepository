@@ -3,8 +3,6 @@ package com.parque.booking.service.booking;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.BookingSummaryResponse;
-import com.parque.booking.model.Booking;
-import com.parque.enums.PaymentStatus;
 
 import java.util.List;
 
