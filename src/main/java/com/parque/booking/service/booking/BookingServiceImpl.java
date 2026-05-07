@@ -80,7 +80,7 @@ public class BookingServiceImpl implements BookingService {
                 .hotel(hotel)
                 .boardType(boardType)
                 .visitDate(request.visitDate())
-                .emailSent(Boolean.TRUE)
+                .emailSent(Boolean.FALSE)
                 .build();
 
         List<Ticket> tickets = companions.stream()
@@ -95,9 +95,8 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking saved = bookingRepository.saveAndFlush(booking);
-        BookingResponse response = toResponse(saved);
-        sendBookingConfirmation(user, response);
-        return response;
+        saved.setEmailSent(sendBookingConfirmation(user, toResponse(saved)));
+        return toResponse(saved);
     }
 
     @Override
@@ -267,12 +266,14 @@ public class BookingServiceImpl implements BookingService {
         return firstName + " " + lastName;
     }
 
-    private void sendBookingConfirmation(User user, BookingResponse bookingResponse) {
+    private boolean sendBookingConfirmation(User user, BookingResponse bookingResponse) {
         if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
-            return;
+            return false;
         }
 
-        notificationService.ifPresent(service -> service.sendBookingConfirmation(List.of(user.getEmail()), bookingResponse));
+        return notificationService
+                .map(service -> service.sendBookingConfirmation(List.of(user.getEmail()), bookingResponse))
+                .orElse(false);
     }
 
     public ArrayList<String> AddParticipantsToBok(ArrayList<String> emailsParticipants, Booking book) {

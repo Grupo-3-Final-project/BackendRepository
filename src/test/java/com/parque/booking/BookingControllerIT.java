@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.repository.BookingRepository;
+import com.parque.booking.dto.BookingResponse;
+import com.parque.booking.service.notification.NotificationService;
 import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.repository.OfferRepository;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
@@ -34,6 +37,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(JacksonTestConfig.class)
@@ -64,6 +70,9 @@ class BookingControllerIT {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @MockitoBean
+    private NotificationService notificationService;
+
     @BeforeEach
     void setUp() {
         bookingRepository.deleteAll();
@@ -71,6 +80,7 @@ class BookingControllerIT {
         hotelRepository.deleteAll();
         userRepository.deleteAll();
         InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
+        when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(true);
     }
 
     @Test
