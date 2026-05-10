@@ -106,6 +106,7 @@ Formato de importes:
 | `201 Created` | Recurso creado correctamente |
 | `204 No Content` | Eliminacion correcta sin body |
 | `400 Bad Request` | Error de validacion o datos incorrectos |
+| `401 Unauthorized` | Credenciales invalidas o autenticacion requerida |
 | `404 Not Found` | Recurso no encontrado |
 | `409 Conflict` | Conflicto con una regla de negocio |
 | `500 Internal Server Error` | Error inesperado del servidor |
@@ -145,6 +146,9 @@ El frontend no debe depender de trazas internas, nombres de excepciones Java ni 
 | Reservas | `POST /api/bookings` | Compra con acompanantes y total calculado |
 | Reservas | `POST /api/bookings` | Error si el hotel esta completo |
 | Reservas | `POST /api/bookings` | Error si un menor viaja sin adulto |
+| Auth interna | `POST /api/auth/login` | Login valido y JWT Bearer |
+| Auth interna | `POST /api/auth/login` | `401` si las credenciales no son validas |
+| Seguridad interna | Endpoints protegidos | `401` si falta token Bearer |
 | Dashboard | `GET /api/dashboard/tickets-by-age-range` | Metrica por rango de edad |
 | Dashboard | `GET /api/dashboard/current-year-revenue` | Recaudacion anual |
 | Dashboard | `GET /api/dashboard/top-hotels` | Top 3 hoteles por recaudacion |
@@ -316,6 +320,32 @@ Error esperado:
 
 - `409 Conflict`: `Hotel is full`
 
+### Credenciales invalidas
+
+Endpoint:
+
+```text
+POST /api/auth/login
+```
+
+Error esperado:
+
+- `401 Unauthorized`: `Invalid credentials`
+
+### Ruta interna sin token
+
+Endpoints internos:
+
+```text
+GET /api/dashboard/current-year-revenue
+POST /api/employees
+POST /api/images/upload
+```
+
+Error esperado:
+
+- `401 Unauthorized`: `Authentication is required`
+
 ### Menor sin adulto
 
 Endpoint:
@@ -376,6 +406,7 @@ Backend debe garantizar que:
 - Devuelve los campos JSON con los nombres exactos acordados.
 - Calcula reglas de negocio y metricas.
 - Devuelve errores controlados con formato comun.
+- Protege con JWT las rutas internas acordadas.
 - Mantiene Swagger/OpenAPI alineado con el contrato.
 - Incluye tests de contrato cuando un endpoint forma parte de la integracion frontend-backend.
 
