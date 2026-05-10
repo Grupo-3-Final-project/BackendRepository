@@ -31,9 +31,7 @@ public class BookingServiceImpl implements BookingService {
 
     private static final int ADULT_AGE = 18;
     private static final int SENIOR_AGE = 65;
-    private static final BigDecimal CHILD_PRICE = new BigDecimal("25.00");
-    private static final BigDecimal ADULT_PRICE = new BigDecimal("45.00");
-    private static final BigDecimal SENIOR_PRICE = new BigDecimal("30.00");
+
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
@@ -74,12 +72,12 @@ public class BookingServiceImpl implements BookingService {
                 .hotel(hotel)
                 .boardType(boardType)
                 .visitDate(request.visitDate())
-                .emailSent(Boolean.TRUE)
+                .emailSent(Boolean.FALSE)
                 .build();
 
         List<Ticket> tickets = companions.stream()
-                .map(companion -> toTicket(booking, companion, request.visitDate()))
-                .toList();
+            .map(companion -> toTicket(booking, companion, request.visitDate(), boardType))
+            .toList();
 
         booking.setTickets(tickets);
         booking.setTotalPrice(calculateTotalPrice(tickets, hotel, boardType));
@@ -149,15 +147,15 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-    private Ticket toTicket(Booking booking, CompanionRequest companion, LocalDate visitDate) {
+    private Ticket toTicket(Booking booking, CompanionRequest companion, LocalDate visitDate, String boardType) {
         String ageRange = resolveAgeRange(companion.birthDate(), visitDate);
         return Ticket.builder()
-                .booking(booking)
-                .holderFullName(companion.firstName() + " " + companion.lastName())
-                .ageRange(ageRange)
-                .price(resolveTicketPrice(ageRange))
-                .build();
-    }
+            .booking(booking)
+            .holderFullName(companion.firstName() + " " + companion.lastName())
+            .ageRange(ageRange)
+            .price(resolveTicketPrice(ageRange, boardType))  // ← PASAMOS boardType
+            .build();
+    }   
 
     private String resolveAgeRange(LocalDate birthDate, LocalDate visitDate) {
         int age = ageAtVisit(birthDate, visitDate);
@@ -177,11 +175,17 @@ public class BookingServiceImpl implements BookingService {
         return Period.between(birthDate, visitDate).getYears();
     }
 
-    private BigDecimal resolveTicketPrice(String ageRange) {
-        return switch (ageRange) {
-            case "CHILD" -> CHILD_PRICE;
-            case "SENIOR" -> SENIOR_PRICE;
-            default -> ADULT_PRICE;
+    private BigDecimal resolveTicketPrice(String ageRange, String boardType) {
+    return switch (ageRange) {
+        case "CHILD" -> boardType.equals("HALF_BOARD")
+            ? new BigDecimal("20.00")
+            : new BigDecimal("30.00");
+        case "SENIOR" -> boardType.equals("HALF_BOARD")
+            ? new BigDecimal("40.00")
+            : new BigDecimal("55.00");
+        default -> boardType.equals("HALF_BOARD")
+            ? new BigDecimal("45.00")
+            : new BigDecimal("65.00");
         };
     }
 
