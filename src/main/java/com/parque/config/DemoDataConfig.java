@@ -237,15 +237,43 @@ public class DemoDataConfig {
             InternalCredentialRepository internalCredentialRepository,
             PasswordEncoder passwordEncoder
     ) {
-        if (internalCredentialRepository.findByUsername(demoAdminUsername).isPresent()) {
+        if (internalCredentialRepository.count() > 0) {
             return;
         }
 
+        // Create demo users with different roles
         internalCredentialRepository.save(InternalCredential.builder()
                 .username(demoAdminUsername)
                 .email(demoAdminEmail)
                 .passwordHash(passwordEncoder.encode(demoAdminPassword))
                 .role(InternalRole.ADMIN)
+                .active(true)
+                .build());
+
+        // Manager user
+        internalCredentialRepository.save(InternalCredential.builder()
+                .username("manager")
+                .email("manager@parque.local")
+                .passwordHash(passwordEncoder.encode("manager123"))
+                .role(InternalRole.MANAGER)
+                .active(true)
+                .build());
+
+        // Employee user
+        internalCredentialRepository.save(InternalCredential.builder()
+                .username("employee")
+                .email("employee@parque.local")
+                .passwordHash(passwordEncoder.encode("employee123"))
+                .role(InternalRole.EMPLOYEE)
+                .active(true)
+                .build());
+
+        // Regular user
+        internalCredentialRepository.save(InternalCredential.builder()
+                .username("user")
+                .email("user@parque.local")
+                .passwordHash(passwordEncoder.encode("user12345"))
+                .role(InternalRole.USER)
                 .active(true)
                 .build());
     }
