@@ -27,6 +27,7 @@ La API sigue el contrato definido por el equipo en:
 - Spring Validation
 - Spring Security
 - JWT
+- Flyway
 - Springdoc OpenAPI
 - Cloudinary
 
@@ -39,6 +40,7 @@ src/main/java/com/parque
 |-- booking
 |-- cloudinary
 |-- config
+|-- db/migration
 |-- dashboard
 |-- employee
 |-- exception
@@ -160,6 +162,22 @@ La fuente funcional del contrato sigue siendo:
 
 - `docs/API_CONTRACT.md`
 - `docs/CONTRACT_TESTING.md`
+
+## Migraciones de base de datos
+
+El esquema queda versionado con Flyway.
+
+Ubicaciones:
+
+- `src/main/resources/db/migration/mysql` para la aplicacion
+- `src/main/resources/db/migration/h2` para la validacion automatica con H2
+
+Reglas de trabajo:
+
+- los cambios de esquema no se hacen ya con `ddl-auto=update`
+- `dev` y `prod` arrancan validando el esquema contra las entidades
+- la primera ejecucion sobre una base MySQL ya existente se baselinea automaticamente
+- una base nueva aplica `V1__init_schema.sql` antes de levantar la aplicacion
 
 ## Testing
 

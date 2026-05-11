@@ -5,7 +5,6 @@ import com.parque.security.ApiAuthenticationEntryPoint;
 import com.parque.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -43,47 +42,10 @@ public class SecurityConfig {
             .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(apiAuthenticationEntryPoint))
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(authz -> authz
-                // ========== PUBLIC ENDPOINTS (No authentication required) ==========
-                // Authentication
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/login").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/v1/auth/refresh").permitAll()
-                // User Registration
-                .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-                // Public Resources (Read-only)
-                .requestMatchers(HttpMethod.GET, "/api/v1/hotels", "/api/v1/hotels/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/attractions", "/api/v1/attractions/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/v1/offers", "/api/v1/offers/**").permitAll()
-                // API Documentation
-                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                
-                // ========== ADMIN ENDPOINTS ==========
-                .requestMatchers("/api/v1/admin/**").hasRole(InternalRole.ADMIN.name())
-                .requestMatchers("/api/v1/dashboard/**").hasRole(InternalRole.ADMIN.name())
-                .requestMatchers("/api/v1/maintenance/**").hasRole(InternalRole.ADMIN.name())
-                .requestMatchers("/api/v1/employees/**").hasRole(InternalRole.ADMIN.name())
-                .requestMatchers("/api/v1/shifts/**").hasRole(InternalRole.ADMIN.name())
-                .requestMatchers(HttpMethod.PUT, "/api/v1/attractions/**").hasRole(InternalRole.ADMIN.name())
-                .requestMatchers(HttpMethod.DELETE, "/api/v1/attractions/**").hasRole(InternalRole.ADMIN.name())
-                
-                // ========== EMPLOYEE ENDPOINTS ==========
-                .requestMatchers(HttpMethod.POST, "/api/v1/bookings/*/confirm", "/api/v1/bookings/*/cancel")
-                    .hasAnyRole(InternalRole.EMPLOYEE.name(), InternalRole.MANAGER.name(), InternalRole.ADMIN.name())
-                .requestMatchers(HttpMethod.PATCH, "/api/v1/attractions/*/status")
-                    .hasAnyRole(InternalRole.EMPLOYEE.name(), InternalRole.MANAGER.name(), InternalRole.ADMIN.name())
-                
-                // ========== USER ENDPOINTS (Authenticated users) ==========
-                .requestMatchers(HttpMethod.GET, "/api/v1/users/*/profile")
-                    .hasAnyRole(InternalRole.USER.name(), InternalRole.MANAGER.name(), InternalRole.ADMIN.name())
-                .requestMatchers(HttpMethod.POST, "/api/v1/bookings")
-                    .hasAnyRole(InternalRole.USER.name(), InternalRole.MANAGER.name(), InternalRole.ADMIN.name())
-                .requestMatchers(HttpMethod.GET, "/api/v1/bookings")
-                    .hasAnyRole(InternalRole.USER.name(), InternalRole.MANAGER.name(), InternalRole.ADMIN.name())
-                .requestMatchers(HttpMethod.GET, "/api/v1/bookings/**")
-                    .hasAnyRole(InternalRole.USER.name(), InternalRole.MANAGER.name(), InternalRole.ADMIN.name())
-                
-                // ========== DENY ALL OTHER REQUESTS ==========
-                .anyRequest().denyAll()
+                .requestMatchers("/api/**").permitAll()
+                .anyRequest().permitAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

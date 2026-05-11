@@ -1,10 +1,11 @@
-package com.parque.booking.service;
+package com.parque.booking.service.booking;
 
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.BookingSummaryResponse;
 
 import java.util.List;
+
 
 public interface BookingService {
 

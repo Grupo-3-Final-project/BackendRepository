@@ -11,6 +11,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -65,4 +66,7 @@ public class Booking {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+
+    ArrayList<String> emailsParticipants;
 }

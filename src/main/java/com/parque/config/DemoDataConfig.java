@@ -7,7 +7,7 @@ import com.parque.attraction.repository.AttractionRepository;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.repository.BookingRepository;
-import com.parque.booking.service.BookingService;
+import com.parque.booking.service.booking.BookingService;
 import com.parque.employee.model.Employee;
 import com.parque.employee.repository.EmployeeRepository;
 import com.parque.entity.InternalCredential;
