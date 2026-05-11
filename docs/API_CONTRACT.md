@@ -19,7 +19,7 @@ Cualquier cambio en endpoints, metodos HTTP, DTOs, requests, responses, nombres 
 Base URL:
 
 ```text
-/api
+/api/v1/v1
 ```
 
 Todas las respuestas deben ser JSON.
@@ -60,7 +60,7 @@ Formato comun de error:
   "status": 400,
   "error": "Bad Request",
   "message": "The hotel is full and cannot be booked",
-  "path": "/api/bookings",
+  "path": "/api/v1/bookings",
   "timestamp": "2026-05-22T10:30:00"
 }
 ```
@@ -69,7 +69,7 @@ Formato comun de error:
 
 Entidad usada para clientes que compran entradas o reservas. Incluye `dni` como identificador documental del usuario.
 
-### GET /api/users
+### GET /api/v1/users
 
 Devuelve todos los usuarios.
 
@@ -89,7 +89,7 @@ Response `200 OK`:
 ]
 ```
 
-### GET /api/users/{id}
+### GET /api/v1/users/{id}
 
 Devuelve un usuario por ID.
 
@@ -111,7 +111,7 @@ Errores posibles:
 
 - `404 Not Found`: `User not found`
 
-### POST /api/users
+### POST /api/v1/users
 
 Crea un usuario.
 
@@ -148,7 +148,7 @@ Errores posibles:
 - `409 Conflict`: `Email already exists`
 - `409 Conflict`: `DNI already exists`
 
-### PUT /api/users/{id}
+### PUT /api/v1/users/{id}
 
 Actualiza un usuario existente.
 
@@ -179,7 +179,7 @@ Response `200 OK`:
 }
 ```
 
-### DELETE /api/users/{id}
+### DELETE /api/v1/users/{id}
 
 Elimina un usuario.
 
@@ -189,13 +189,13 @@ Response:
 204 No Content
 ```
 
-`GET /api/users`, `GET /api/users/{id}`, `PUT /api/users/{id}` y `DELETE /api/users/{id}` requieren autenticacion interna con JWT.
+`GET /api/v1/users`, `GET /api/v1/users/{id}`, `PUT /api/v1/users/{id}` y `DELETE /api/v1/users/{id}` requieren autenticacion interna con JWT.
 
 ## 3.1. Auth interna
 
 Este modulo es solo para rutas internas de administracion y taquilla. No aplica a visitantes ni a la compra publica.
 
-### POST /api/auth/login
+### POST /api/v1/auth/login
 
 Valida una credencial interna y devuelve un JWT Bearer.
 
@@ -231,7 +231,7 @@ Errores posibles:
 
 Entidad usada para mostrar hoteles, crear reservas y calcular ofertas. Debe reflejar habitaciones, plazas totales y plazas disponibles.
 
-### GET /api/hotels
+### GET /api/v1/hotels
 
 Devuelve todos los hoteles.
 
@@ -254,7 +254,7 @@ Response `200 OK`:
 ]
 ```
 
-### GET /api/hotels/{id}
+### GET /api/v1/hotels/{id}
 
 Devuelve un hotel por ID.
 
@@ -275,7 +275,7 @@ Response `200 OK`:
 }
 ```
 
-### POST /api/hotels
+### POST /api/v1/hotels
 
 Crea un hotel.
 
@@ -312,7 +312,7 @@ Response `201 Created`:
 }
 ```
 
-### PUT /api/hotels/{id}
+### PUT /api/v1/hotels/{id}
 
 Actualiza un hotel existente.
 
@@ -349,7 +349,7 @@ Response `200 OK`:
 }
 ```
 
-### DELETE /api/hotels/{id}
+### DELETE /api/v1/hotels/{id}
 
 Elimina un hotel.
 
@@ -359,7 +359,7 @@ Response:
 204 No Content
 ```
 
-`POST /api/hotels`, `PUT /api/hotels/{id}` y `DELETE /api/hotels/{id}` requieren autenticacion interna con JWT.
+`POST /api/v1/hotels`, `PUT /api/v1/hotels/{id}` y `DELETE /api/v1/hotels/{id}` requieren autenticacion interna con JWT.
 
 ## 5. Atracciones
 
@@ -369,7 +369,7 @@ Valores propuestos para `status`: `OPEN`, `CLOSED`, `MAINTENANCE`.
 
 `totalSeats` representa la capacidad total de plazas de la atraccion y `availableSeats` las plazas disponibles en ese momento.
 
-### GET /api/attractions
+### GET /api/v1/attractions
 
 Devuelve todas las atracciones.
 
@@ -391,7 +391,7 @@ Response `200 OK`:
 ]
 ```
 
-### GET /api/attractions/{id}
+### GET /api/v1/attractions/{id}
 
 Devuelve una atraccion por ID.
 
@@ -411,7 +411,7 @@ Response `200 OK`:
 }
 ```
 
-### POST /api/attractions
+### POST /api/v1/attractions
 
 Crea una atraccion.
 
@@ -447,7 +447,7 @@ Response `201 Created`:
 
 `maintenanceFrequencyDays` puede calcularse automaticamente segun el tamano de la atraccion.
 
-### PUT /api/attractions/{id}
+### PUT /api/v1/attractions/{id}
 
 Actualiza una atraccion existente.
 
@@ -481,7 +481,7 @@ Response `200 OK`:
 }
 ```
 
-### DELETE /api/attractions/{id}
+### DELETE /api/v1/attractions/{id}
 
 Elimina una atraccion.
 
@@ -491,7 +491,7 @@ Response:
 204 No Content
 ```
 
-`POST /api/attractions`, `PUT /api/attractions/{id}` y `DELETE /api/attractions/{id}` requieren autenticacion interna con JWT.
+`POST /api/v1/attractions`, `PUT /api/v1/attractions/{id}` y `DELETE /api/v1/attractions/{id}` requieren autenticacion interna con JWT.
 
 ## 6. Empleados
 
@@ -501,7 +501,7 @@ Valores propuestos para `employeeType`: `CLEANER`, `ANIMATOR`, `TECHNICIAN`.
 
 Valores propuestos para `shift`: `MORNING`, `AFTERNOON`.
 
-### GET /api/employees
+### GET /api/v1/employees
 
 Devuelve todos los empleados.
 
@@ -522,7 +522,7 @@ Response `200 OK`:
 ]
 ```
 
-### GET /api/employees/{id}
+### GET /api/v1/employees/{id}
 
 Devuelve un empleado por ID.
 
@@ -541,7 +541,7 @@ Response `200 OK`:
 }
 ```
 
-### POST /api/employees
+### POST /api/v1/employees
 
 Crea un empleado.
 
@@ -574,7 +574,7 @@ Response `201 Created`:
 }
 ```
 
-### PUT /api/employees/{id}
+### PUT /api/v1/employees/{id}
 
 Actualiza un empleado.
 
@@ -607,7 +607,7 @@ Response `200 OK`:
 }
 ```
 
-### DELETE /api/employees/{id}
+### DELETE /api/v1/employees/{id}
 
 Elimina un empleado.
 
@@ -617,7 +617,7 @@ Response:
 204 No Content
 ```
 
-Todos los endpoints de `/api/employees` requieren autenticacion interna con JWT.
+Todos los endpoints de `/api/v1/employees` requieren autenticacion interna con JWT.
 
 ## 7. Ofertas
 
@@ -625,7 +625,7 @@ Las ofertas combinan hotel, tipo de pension y entradas.
 
 Valor propuesto para `boardType`: `HALF_BOARD`, `FULL_BOARD`.
 
-### GET /api/offers
+### GET /api/v1/offers
 
 Devuelve las ofertas disponibles.
 
@@ -647,7 +647,7 @@ Response `200 OK`:
 ]
 ```
 
-### GET /api/offers/{id}
+### GET /api/v1/offers/{id}
 
 Devuelve una oferta por ID.
 
@@ -667,7 +667,7 @@ Response `200 OK`:
 }
 ```
 
-### POST /api/offers
+### POST /api/v1/offers
 
 Crea una oferta.
 
@@ -685,7 +685,7 @@ Request:
 }
 ```
 
-`POST /api/offers` requiere autenticacion interna con JWT.
+`POST /api/v1/offers` requiere autenticacion interna con JWT.
 
 Response `201 Created`:
 
@@ -717,7 +717,7 @@ El backend calcula las tarifas segun edad.
 
 Valores propuestos para `ageRange`: `CHILD`, `ADULT`, `SENIOR`.
 
-### POST /api/bookings
+### POST /api/v1/bookings
 
 Crea una compra o reserva.
 
@@ -783,7 +783,7 @@ Errores posibles:
 - `409 Conflict`: `A minor cannot travel without an adult`
 - `500 Internal Server Error`: `Email could not be sent`
 
-### GET /api/bookings
+### GET /api/v1/bookings
 
 Devuelve todas las compras o reservas.
 
@@ -805,7 +805,7 @@ Response `200 OK`:
 
 Requiere autenticacion interna con JWT.
 
-### GET /api/bookings/{id}
+### GET /api/v1/bookings/{id}
 
 Devuelve el detalle completo de una reserva.
 
@@ -842,7 +842,7 @@ Requiere autenticacion interna con JWT.
 
 ## 9. Turnos de empleados
 
-### GET /api/shifts
+### GET /api/v1/shifts
 
 Devuelve los turnos generados.
 
@@ -864,7 +864,7 @@ Response `200 OK`:
 
 Requiere autenticacion interna con JWT.
 
-### POST /api/shifts/generate
+### POST /api/v1/shifts/generate
 
 Genera turnos automaticamente cumpliendo la rotacion de 15 dias y la cobertura minima por oficio.
 
@@ -898,7 +898,7 @@ Requiere autenticacion interna con JWT.
 
 Valores propuestos para `status`: `SCHEDULED`, `COMPLETED`, `CANCELLED`.
 
-### GET /api/maintenance
+### GET /api/v1/maintenance
 
 Devuelve la agenda de mantenimiento.
 
@@ -924,7 +924,7 @@ Response `200 OK`:
 
 Requiere autenticacion interna con JWT.
 
-### POST /api/maintenance/generate
+### POST /api/v1/maintenance/generate
 
 Genera la agenda de mantenimiento automaticamente segun el tamano de las atracciones y asocia tecnicos disponibles.
 
@@ -958,7 +958,7 @@ Requiere autenticacion interna con JWT.
 
 Estos endpoints devuelven metricas funcionales calculadas por backend.
 
-### GET /api/dashboard/tickets-by-age-range?year=2026
+### GET /api/v1/dashboard/tickets-by-age-range?year=2026
 
 Devuelve cuantas entradas se han vendido por rango de edad en un ano concreto.
 
@@ -983,7 +983,7 @@ Response `200 OK`:
 
 Requiere autenticacion interna con JWT.
 
-### GET /api/dashboard/current-year-revenue
+### GET /api/v1/dashboard/current-year-revenue
 
 Devuelve el total ganado en el ano en curso.
 
@@ -998,7 +998,7 @@ Response `200 OK`:
 
 Requiere autenticacion interna con JWT.
 
-### GET /api/dashboard/top-hotels?year=2026
+### GET /api/v1/dashboard/top-hotels?year=2026
 
 Devuelve los 3 hoteles que mas recaudan en el ano indicado.
 
@@ -1026,7 +1026,7 @@ Response `200 OK`:
 
 Requiere autenticacion interna con JWT.
 
-### GET /api/dashboard/summary?year=2026
+### GET /api/v1/dashboard/summary?year=2026
 
 Endpoint opcional para devolver todas las metricas principales del dashboard en una sola llamada.
 
@@ -1076,7 +1076,7 @@ Requiere autenticacion interna con JWT.
 
 Este endpoint puede usarse para subir imagenes de hoteles, atracciones, ofertas o empleados.
 
-### POST /api/images/upload
+### POST /api/v1/images/upload
 
 Sube una imagen a Cloudinary.
 

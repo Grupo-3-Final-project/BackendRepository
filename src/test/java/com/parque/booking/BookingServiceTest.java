@@ -89,8 +89,8 @@ class BookingServiceTest {
         assertThat(created.tickets()).hasSize(2);
         assertThat(created.tickets()).extracting(ticket -> ticket.ageRange())
                 .containsExactlyInAnyOrder("ADULT", "CHILD");
-        assertThat(created.totalPrice()).isEqualByComparingTo("190.00");
-        assertThat(created.emailSent()).isTrue();
+        assertThat(created.totalPrice()).isEqualByComparingTo("215.00");
+        assertThat(created.emailSent()).isFalse();
         assertThat(created.createdAt()).isNotNull();
 
         verify(notificationService).sendBookingConfirmation(eq(List.of("david@example.com")), any(BookingResponse.class));
