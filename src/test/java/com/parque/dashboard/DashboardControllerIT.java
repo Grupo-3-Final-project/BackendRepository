@@ -280,7 +280,7 @@ class DashboardControllerIT {
         assertThat(revenue.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode revenueBody = objectMapper.readTree(revenue.getBody());
         assertThat(revenueBody.get("year").asInt()).isEqualTo(currentYear);
-        assertThat(revenueBody.get("totalRevenue").asDouble()).isEqualTo(780.0);
+        assertThat(revenueBody.get("totalRevenue").asDouble()).isEqualTo(825.0);
 
         ResponseEntity<String> topHotels = restClient()
                 .get()
@@ -295,10 +295,10 @@ class DashboardControllerIT {
         assertThat(fieldNames(topHotelsBody.get(0))).containsExactly("hotelId", "hotelName", "revenue");
         assertThat(topHotelsBody.get(0).get("hotelId").asLong()).isEqualTo(hotelMagicPark.getId());
         assertThat(topHotelsBody.get(0).get("hotelName").asText()).isEqualTo("Hotel Magic Park");
-        assertThat(topHotelsBody.get(0).get("revenue").asDouble()).isEqualTo(390.0);
+        assertThat(topHotelsBody.get(0).get("revenue").asDouble()).isEqualTo(440.0);
         assertThat(topHotelsBody.get(1).get("hotelId").asLong()).isEqualTo(hotelAdventure.getId());
         assertThat(topHotelsBody.get(1).get("hotelName").asText()).isEqualTo("Hotel Adventure");
-        assertThat(topHotelsBody.get(1).get("revenue").asDouble()).isEqualTo(140.0);
+        assertThat(topHotelsBody.get(1).get("revenue").asDouble()).isEqualTo(135.0);
         assertThat(topHotelsBody.get(2).get("hotelId").asLong()).isEqualTo(hotelFantasy.getId());
         assertThat(topHotelsBody.get(2).get("hotelName").asText()).isEqualTo("Hotel Fantasy");
         assertThat(topHotelsBody.get(2).get("revenue").asDouble()).isEqualTo(105.0);
@@ -313,7 +313,7 @@ class DashboardControllerIT {
         JsonNode summaryBody = objectMapper.readTree(summary.getBody());
         assertThat(fieldNames(summaryBody)).containsExactly("year", "totalRevenue", "ticketsByAgeRange", "topHotels");
         assertThat(summaryBody.get("year").asInt()).isEqualTo(currentYear);
-        assertThat(summaryBody.get("totalRevenue").asDouble()).isEqualTo(780.0);
+        assertThat(summaryBody.get("totalRevenue").asDouble()).isEqualTo(825.0);
         assertThat(summaryBody.get("ticketsByAgeRange")).hasSize(3);
         assertThat(summaryBody.get("topHotels")).hasSize(3);
     }

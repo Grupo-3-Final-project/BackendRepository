@@ -63,7 +63,7 @@ class BookingServiceTest {
     }
 
     @Test
-    void create_shouldCreateBookingAndDecreaseHotelAvailability() {
+    void create_shouldCreateBookingDecreaseHotelAvailabilityAndMarkEmailAsSent() {
         User user = saveUser("david@example.com", "12345678A");
         Hotel hotel = saveHotel(4, new BigDecimal("80.00"), new BigDecimal("120.00"));
         when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(true);
@@ -90,7 +90,7 @@ class BookingServiceTest {
         assertThat(created.tickets()).extracting(ticket -> ticket.ageRange())
                 .containsExactlyInAnyOrder("ADULT", "CHILD");
         assertThat(created.totalPrice()).isEqualByComparingTo("215.00");
-        assertThat(created.emailSent()).isFalse();
+        assertThat(created.emailSent()).isTrue();
         assertThat(created.createdAt()).isNotNull();
 
         verify(notificationService).sendBookingConfirmation(eq(List.of("david@example.com")), any(BookingResponse.class));

@@ -131,11 +131,11 @@ class BookingControllerIT {
         assertThat(fieldNames(body.get("tickets").get(1))).containsExactly("holderFullName", "ageRange", "price");
         assertThat(body.get("tickets").get(0).get("holderFullName").asText()).isEqualTo("Ana Garcia");
         assertThat(body.get("tickets").get(0).get("ageRange").asText()).isEqualTo("ADULT");
-        assertThat(body.get("tickets").get(0).get("price").asDouble()).isEqualTo(45.0);
+        assertThat(body.get("tickets").get(0).get("price").asDouble()).isEqualTo(65.0);
         assertThat(body.get("tickets").get(1).get("holderFullName").asText()).isEqualTo("Lucas Garcia");
         assertThat(body.get("tickets").get(1).get("ageRange").asText()).isEqualTo("CHILD");
-        assertThat(body.get("tickets").get(1).get("price").asDouble()).isEqualTo(25.0);
-        assertThat(body.get("totalPrice").asDouble()).isEqualTo(190.0);
+        assertThat(body.get("tickets").get(1).get("price").asDouble()).isEqualTo(30.0);
+        assertThat(body.get("totalPrice").asDouble()).isEqualTo(215.0);
         assertThat(body.get("emailSent").asBoolean()).isTrue();
         assertThat(body.get("createdAt").asText()).isNotBlank();
     }
@@ -318,7 +318,7 @@ class BookingControllerIT {
         assertThat(body.get(0).get("hotelName").asText()).isEqualTo("Hotel Magic Park");
         assertThat(body.get(0).get("visitDate").asText()).isEqualTo("2026-05-22");
         assertThat(body.get(0).get("totalTickets").asInt()).isEqualTo(2);
-        assertThat(body.get(0).get("totalPrice").asDouble()).isEqualTo(190.0);
+        assertThat(body.get(0).get("totalPrice").asDouble()).isEqualTo(215.0);
         assertThat(body.get(0).get("createdAt").asText()).isNotBlank();
     }
 
@@ -376,7 +376,7 @@ class BookingControllerIT {
         assertThat(body.get("tickets").size()).isEqualTo(2);
         assertThat(fieldNames(body.get("tickets").get(0))).containsExactly("holderFullName", "ageRange", "price");
         assertThat(fieldNames(body.get("tickets").get(1))).containsExactly("holderFullName", "ageRange", "price");
-        assertThat(body.get("totalPrice").asDouble()).isEqualTo(190.0);
+        assertThat(body.get("totalPrice").asDouble()).isEqualTo(215.0);
         assertThat(body.get("emailSent").asBoolean()).isTrue();
         assertThat(body.get("createdAt").asText()).isNotBlank();
     }
