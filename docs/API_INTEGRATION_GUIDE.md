@@ -18,8 +18,8 @@ Guía completa para desarrolladores de frontend que necesitan integrar la API de
 ### Base URL
 
 ```
-Desarrollo: http://localhost:8080/api/v1
-Producción: https://parque-atracciones.com/api/v1
+Desarrollo: http://localhost:8080/api
+Producción: https://parque-atracciones.com/api
 ```
 
 ### Setup en Frontend (React + Axios)
@@ -29,7 +29,7 @@ Producción: https://parque-atracciones.com/api/v1
 import axios from 'axios';
 
 const apiClient = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api/v1',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ Renovar el token de acceso cuando está próximo a expirar.
   "status": 400,
   "error": "Bad Request",
   "message": "Descripción legible del error",
-  "path": "/api/v1/bookings",
+  "path": "/api/bookings",
   "timestamp": "2026-05-22T10:30:00"
 }
 ```
@@ -439,14 +439,14 @@ export const AttractionsPage = () => {
 ### .env.local (Development)
 
 ```bash
-REACT_APP_API_URL=http://localhost:8080/api/v1
+REACT_APP_API_URL=http://localhost:8080/api
 REACT_APP_ENV=development
 ```
 
 ### .env.production
 
 ```bash
-REACT_APP_API_URL=https://parque-atracciones.com/api/v1
+REACT_APP_API_URL=https://parque-atracciones.com/api
 REACT_APP_ENV=production
 ```
 

@@ -149,7 +149,7 @@ if curl -s "$BACKEND_URL/v3/api-docs" -o /tmp/openapi.json; then
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8080/api/v1",
+      "value": "http://localhost:8080/api",
       "type": "string"
     },
     {
@@ -167,7 +167,7 @@ EOF
     echo "  1. Abrir Postman"
     echo "  2. Importar: File > Import > Seleccionar: $OUTPUT_FILE"
     echo "  3. Configurar variables:"
-    echo "     - base_url: http://localhost:8080/api/v1 (o tu URL)"
+    echo "     - base_url: http://localhost:8080/api (o tu URL)"
     echo "     - token: Tu JWT token (obtenido del endpoint /auth/login)"
     echo ""
 else

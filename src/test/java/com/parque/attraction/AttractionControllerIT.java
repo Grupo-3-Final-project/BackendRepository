@@ -214,6 +214,22 @@ class AttractionControllerIT {
         assertThat(body.get("message").asText()).isEqualTo("Attraction not found");
     }
 
+    @Test
+    void getLegacyAttractionsRoute_shouldReturn404WithApiError() throws Exception {
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/v1/attractions")
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("status").asInt()).isEqualTo(404);
+        assertThat(body.get("error").asText()).isEqualTo("Not Found");
+        assertThat(body.get("message").asText()).isEqualTo("Resource not found");
+        assertThat(body.get("path").asText()).isEqualTo("/api/v1/attractions");
+    }
+
     private ResponseEntity<String> postJson(String path, String body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");

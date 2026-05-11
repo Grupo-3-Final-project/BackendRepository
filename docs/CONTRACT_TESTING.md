@@ -284,10 +284,10 @@ Los tests deben cubrir que:
     {
       "holderFullName": "Ana Garcia",
       "ageRange": "ADULT",
-      "price": 45.0
+      "price": 65.0
     }
   ],
-  "totalPrice": 190.0,
+  "totalPrice": 185.0,
   "emailSent": true,
   "createdAt": "2026-05-22T10:30:00"
 }
