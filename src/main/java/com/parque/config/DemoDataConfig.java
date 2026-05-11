@@ -95,7 +95,7 @@ public class DemoDataConfig {
                     .availablePlaces(240)
                     .halfBoardPrice(new BigDecimal("80.00"))
                     .fullBoardPrice(new BigDecimal("120.00"))
-                    .imageUrl("https://res.cloudinary.com/demo/image/upload/hotel.jpg")
+                    .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778153079/hotels/publicHomeHeroGate_sytdho.png")
                     .build());
 
             Hotel adventure = hotelRepository.save(Hotel.builder()
@@ -107,7 +107,7 @@ public class DemoDataConfig {
                     .availablePlaces(180)
                     .halfBoardPrice(new BigDecimal("70.00"))
                     .fullBoardPrice(new BigDecimal("110.00"))
-                    .imageUrl("https://res.cloudinary.com/demo/image/upload/hotel2.jpg")
+                    .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/hotels/publicHomeParkMap_d23ikl.png")
                     .build());
 
             Hotel fantasy = hotelRepository.save(Hotel.builder()
@@ -119,7 +119,7 @@ public class DemoDataConfig {
                     .availablePlaces(160)
                     .halfBoardPrice(new BigDecimal("65.00"))
                     .fullBoardPrice(new BigDecimal("95.00"))
-                    .imageUrl("https://res.cloudinary.com/demo/image/upload/hotel3.jpg")
+                    .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778234157/hotels/chef_bbsbqp.jpg")
                     .build());
 
             attractionRepository.saveAll(List.of(
@@ -131,7 +131,7 @@ public class DemoDataConfig {
                             .totalSeats(32)
                             .availableSeats(32)
                             .maintenanceFrequencyDays(7)
-                            .imageUrl("https://res.cloudinary.com/demo/image/upload/attraction.jpg")
+                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778222227/attractions/attractionTerrorTower_hbkqm6.png")
                             .build(),
                     Attraction.builder()
                             .name("Splash River")
@@ -141,7 +141,7 @@ public class DemoDataConfig {
                             .totalSeats(24)
                             .availableSeats(24)
                             .maintenanceFrequencyDays(14)
-                            .imageUrl("https://res.cloudinary.com/demo/image/upload/attraction2.jpg")
+                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778221870/attractions/attractionBloodRiver_kx4mxb.png")
                             .build(),
                     Attraction.builder()
                             .name("Fantasy Carousel")
@@ -151,7 +151,7 @@ public class DemoDataConfig {
                             .totalSeats(18)
                             .availableSeats(18)
                             .maintenanceFrequencyDays(30)
-                            .imageUrl("https://res.cloudinary.com/demo/image/upload/attraction3.jpg")
+                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778221799/attractions/attractionDarkLabyrinth_yqjgnt.png")
                             .build()
             ));
 
@@ -175,7 +175,7 @@ public class DemoDataConfig {
                             .boardType("FULL_BOARD")
                             .includedTickets(4)
                             .totalPrice(new BigDecimal("399.99"))
-                            .imageUrl("https://res.cloudinary.com/demo/image/upload/offer.jpg")
+                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerHotelTicket_d8hvg3.png")
                             .build(),
                     Offer.builder()
                             .title("Oferta Aventura")
@@ -184,7 +184,7 @@ public class DemoDataConfig {
                             .boardType("HALF_BOARD")
                             .includedTickets(3)
                             .totalPrice(new BigDecimal("249.99"))
-                            .imageUrl("https://res.cloudinary.com/demo/image/upload/offer2.jpg")
+                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerFamilyPack_tzegmw.png")
                             .build()
             ));
 
