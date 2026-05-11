@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoResourceFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleNoResourceFound(
+    public ResponseEntity<ErrorResponseDTO> handleNoResourceFound(
             NoResourceFoundException ex,
             HttpServletRequest request
     ) {
