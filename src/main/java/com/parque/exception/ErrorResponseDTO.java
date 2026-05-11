@@ -2,7 +2,7 @@ package com.parque.exception;
 
 import java.time.LocalDateTime;
 
-public record ApiErrorResponse(
+public record ErrorResponseDTO(
         int status,
         String error,
         String message,
@@ -10,4 +10,3 @@ public record ApiErrorResponse(
         LocalDateTime timestamp
 ) {
 }
-

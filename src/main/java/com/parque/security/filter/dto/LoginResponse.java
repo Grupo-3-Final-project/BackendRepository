@@ -1,4 +1,4 @@
-package com.parque.security.dto;
+package com.parque.security.filter.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
