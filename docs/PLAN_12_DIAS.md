@@ -64,8 +64,8 @@ El backend está ~95% listo (todos módulos implementados, tests pasando). La es
   - Tiempo: 1h | Criteria: Archivo .json con todos 30+ endpoints listos para import
 - **Tarea 5.2**: Crear API_INTEGRATION_GUIDE.md (variables, ejemplos, casos de uso)
   - Tiempo: 2h | Criteria: Frontend dev entiende cómo usar cada endpoint
-- **Tarea 5.3**: Versionar API (v1/ en paths)
-  - Tiempo: 1h | Criteria: `/api/v1/users`, `/api/v1/hotels` etc
+- **Tarea 5.3**: Alinear rutas API con el contrato actual
+  - Tiempo: 1h | Criteria: `/api/users`, `/api/hotels`, `/api/attractions`, `/api/bookings` etc
 - **Tarea 5.4**: QA final backend: todos tests pasan, Swagger accesible
   - Tiempo: 1h | Criteria: `mvn test` = 100% pases, Swagger visible
 
@@ -83,18 +83,18 @@ El backend está ~95% listo (todos módulos implementados, tests pasando). La es
 - **Tarea 6.3**: Login page conectado a backend
   - Tiempo: 2h | Criteria: Username/password → backend → token guardado en localStorage
 - **Tarea 6.4**: Signup page conectada
-  - Tiempo: 1.5h | Criteria: Form validación local → POST /api/v1/users → Redirect login
+  - Tiempo: 1.5h | Criteria: Form validación local → POST /api/users → Redirect login
 
 **Dependencias**: FASE 1 completada (backend listo)
 
 ---
 
 #### **Día 7: Core Pages - Hotel & Attractions** (8 horas)
-- **Tarea 7.1**: Hotel search page (GET /api/v1/hotels + disponibilidad)
+- **Tarea 7.1**: Hotel search page (GET /api/hotels + disponibilidad)
   - Tiempo: 3h | Criteria: Listar hoteles, filtrar por fecha/capacidad, ver detalles
-- **Tarea 7.2**: Attractions page (GET /api/v1/attractions)
+- **Tarea 7.2**: Attractions page (GET /api/attractions)
   - Tiempo: 2h | Criteria: Listar, filtrar por estado (OPEN), ver descripciones
-- **Tarea 7.3**: Hotel detail + booking form (POST /api/v1/bookings)
+- **Tarea 7.3**: Hotel detail + booking form (POST /api/bookings)
   - Tiempo: 2h | Criteria: Seleccionar hotel + fecha → enviar booking → confirmación
 - **Tarea 7.4**: Attraction detail page (no booking, solo info)
   - Tiempo: 1h | Criteria: Mostrar detalles, características, horarios
@@ -104,11 +104,11 @@ El backend está ~95% listo (todos módulos implementados, tests pasando). La es
 ---
 
 #### **Día 8: Dashboard & Advanced Features** (7 horas)
-- **Tarea 8.1**: Dashboard page (si usuario es admin: GET /api/v1/dashboard/metrics)
+- **Tarea 8.1**: Dashboard page (si usuario es admin: GET /api/dashboard/summary?year=YYYY)
   - Tiempo: 3h | Criteria: Gráficas revenue, tickets por edad, hoteles top
-- **Tarea 8.2**: Mis Reservas page (GET /api/v1/bookings/user/{id})
-  - Tiempo: 2h | Criteria: Listar bookings del usuario, estado, detalles
-- **Tarea 8.3**: Editar perfil (PUT /api/v1/users/{id})
+- **Tarea 8.2**: Mis Reservas page (GET /api/bookings)
+  - Tiempo: 2h | Criteria: Listar bookings disponibles, estado y detalles segun el alcance actual
+- **Tarea 8.3**: Editar perfil (PUT /api/users/{id})
   - Tiempo: 1.5h | Criteria: Form para cambiar nombre, email, etc
 - **Tarea 8.4**: Logout & auth guard
   - Tiempo: 0.5h | Criteria: Logout limpia token, rutas protegidas redirigen login
@@ -134,7 +134,7 @@ El backend está ~95% listo (todos módulos implementados, tests pasando). La es
 #### **Día 10: Integration Testing Frontend** (6 horas)
 - **Tarea 10.1**: Tests unitarios componentes críticos (Auth, Booking form)
   - Tiempo: 2.5h | Criteria: 15+ unit tests, mocking API calls
-- **Tarea 10.2**: Tests de integración frontend-backend (mocking requests a /api/v1/*)
+- **Tarea 10.2**: Tests de integración frontend-backend (mocking requests a /api/*)
   - Tiempo: 2h | Criteria: Flujo completo: login → buscar hotel → booking → dashboard
 - **Tarea 10.3**: Error handling tests (qué pasa si backend returna 500)
   - Tiempo: 1.5h | Criteria: App no crusha, user ve mensaje amigable

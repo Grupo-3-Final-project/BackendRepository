@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/hotels")
+@RequestMapping("/api/hotels")
 @Tag(name = "Hotels", description = "Gestión de hoteles del parque")
 public class HotelController {
 

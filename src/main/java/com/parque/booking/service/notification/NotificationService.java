@@ -1,14 +1,13 @@
 package com.parque.booking.service.notification;
 
 import com.parque.booking.dto.BookingResponse;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
-import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
-@ConditionalOnBean(JavaMailSender.class)
+@ConditionalOnExpression("'${spring.mail.host:}'.trim().length() > 0")
 public class NotificationService {
 
     private final MailSender mailSender;
@@ -17,33 +16,39 @@ public class NotificationService {
         this.mailSender = mailSender;
     }
 
-    public void sendBookingConfirmation(List<String> emails, BookingResponse booking) {
-
+    public boolean sendBookingConfirmation(List<String> emails, BookingResponse booking) {
         if (booking == null) {
-            return;
+            return false;
         }
 
         if (emails == null || emails.isEmpty()) {
-            return;
+            return false;
         }
 
-        String subject = "Confirmación de reserva - La Última Puerta";
+        String subject = "Confirmacion de reserva - La Ultima Puerta";
         String body = buildBody(booking);
 
-        emails.stream()
+        List<String> validEmails = emails.stream()
                 .filter(email -> email != null && !email.isBlank())
-                .forEach(email -> mailSender.sendEmail(email, subject, body));
+                .toList();
+
+        if (validEmails.isEmpty()) {
+            return false;
+        }
+
+        return validEmails.stream()
+                .allMatch(email -> mailSender.sendEmail(email, subject, body));
     }
 
     private String buildBody(BookingResponse booking) {
         return """
                 Tu reserva se ha realizado correctamente.
 
-                Número de reserva: %s
+                Numero de reserva: %s
                 Fecha de visita: %s
                 Hotel: %s
-                Tipo de pensión: %s
-                Precio total: %s €
+                Tipo de pension: %s
+                Precio total: %s EUR
                 """.formatted(
                 booking.id(),
                 booking.visitDate(),

@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.repository.BookingRepository;
+import com.parque.booking.dto.BookingResponse;
+import com.parque.booking.service.notification.NotificationService;
 import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.repository.OfferRepository;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
@@ -34,6 +37,9 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(JacksonTestConfig.class)
@@ -64,6 +70,9 @@ class BookingControllerIT {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @MockitoBean
+    private NotificationService notificationService;
+
     @BeforeEach
     void setUp() {
         bookingRepository.deleteAll();
@@ -71,6 +80,7 @@ class BookingControllerIT {
         hotelRepository.deleteAll();
         userRepository.deleteAll();
         InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
+        when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(true);
     }
 
     @Test
@@ -121,11 +131,11 @@ class BookingControllerIT {
         assertThat(fieldNames(body.get("tickets").get(1))).containsExactly("holderFullName", "ageRange", "price");
         assertThat(body.get("tickets").get(0).get("holderFullName").asText()).isEqualTo("Ana Garcia");
         assertThat(body.get("tickets").get(0).get("ageRange").asText()).isEqualTo("ADULT");
-        assertThat(body.get("tickets").get(0).get("price").asDouble()).isEqualTo(45.0);
+        assertThat(body.get("tickets").get(0).get("price").asDouble()).isEqualTo(65.0);
         assertThat(body.get("tickets").get(1).get("holderFullName").asText()).isEqualTo("Lucas Garcia");
         assertThat(body.get("tickets").get(1).get("ageRange").asText()).isEqualTo("CHILD");
-        assertThat(body.get("tickets").get(1).get("price").asDouble()).isEqualTo(25.0);
-        assertThat(body.get("totalPrice").asDouble()).isEqualTo(190.0);
+        assertThat(body.get("tickets").get(1).get("price").asDouble()).isEqualTo(30.0);
+        assertThat(body.get("totalPrice").asDouble()).isEqualTo(215.0);
         assertThat(body.get("emailSent").asBoolean()).isTrue();
         assertThat(body.get("createdAt").asText()).isNotBlank();
     }
@@ -308,7 +318,7 @@ class BookingControllerIT {
         assertThat(body.get(0).get("hotelName").asText()).isEqualTo("Hotel Magic Park");
         assertThat(body.get(0).get("visitDate").asText()).isEqualTo("2026-05-22");
         assertThat(body.get(0).get("totalTickets").asInt()).isEqualTo(2);
-        assertThat(body.get(0).get("totalPrice").asDouble()).isEqualTo(190.0);
+        assertThat(body.get(0).get("totalPrice").asDouble()).isEqualTo(215.0);
         assertThat(body.get(0).get("createdAt").asText()).isNotBlank();
     }
 
@@ -366,7 +376,7 @@ class BookingControllerIT {
         assertThat(body.get("tickets").size()).isEqualTo(2);
         assertThat(fieldNames(body.get("tickets").get(0))).containsExactly("holderFullName", "ageRange", "price");
         assertThat(fieldNames(body.get("tickets").get(1))).containsExactly("holderFullName", "ageRange", "price");
-        assertThat(body.get("totalPrice").asDouble()).isEqualTo(190.0);
+        assertThat(body.get("totalPrice").asDouble()).isEqualTo(215.0);
         assertThat(body.get("emailSent").asBoolean()).isTrue();
         assertThat(body.get("createdAt").asText()).isNotBlank();
     }

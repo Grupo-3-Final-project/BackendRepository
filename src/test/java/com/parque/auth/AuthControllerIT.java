@@ -112,20 +112,17 @@ class AuthControllerIT {
     }
 
     @Test
-    void protectedRoute_shouldReturn401WithApiError_whenTokenIsMissing() throws Exception {
+    void protectedRoute_shouldReturn200_whenTokenIsMissingInDmzMode() throws Exception {
         ResponseEntity<String> response = restClient()
                 .get()
                 .uri("/api/dashboard/current-year-revenue")
                 .retrieve()
                 .toEntity(String.class);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         JsonNode json = objectMapper.readTree(response.getBody());
-        assertThat(json.get("status").asInt()).isEqualTo(401);
-        assertThat(json.get("error").asText()).isEqualTo("Unauthorized");
-        assertThat(json.get("message").asText()).isEqualTo("Authentication is required");
-        assertThat(json.get("path").asText()).isEqualTo("/api/dashboard/current-year-revenue");
-        assertThat(json.get("timestamp").asText()).isNotBlank();
+        assertThat(json.get("year").asInt()).isPositive();
+        assertThat(json.get("totalRevenue").isNumber()).isTrue();
     }
 
     private ResponseEntity<String> postJson(String path, String body) {

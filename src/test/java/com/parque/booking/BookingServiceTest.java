@@ -5,6 +5,7 @@ import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.repository.BookingRepository;
 import com.parque.booking.service.booking.BookingService;
+import com.parque.booking.service.notification.NotificationService;
 import com.parque.exception.ConflictException;
 import com.parque.exception.ResourceNotFoundException;
 import com.parque.hotel.model.Hotel;
@@ -16,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -24,6 +26,11 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @Transactional
@@ -44,6 +51,9 @@ class BookingServiceTest {
     @Autowired
     private OfferRepository offerRepository;
 
+    @MockitoBean
+    private NotificationService notificationService;
+
     @BeforeEach
     void setUp() {
         bookingRepository.deleteAll();
@@ -53,9 +63,10 @@ class BookingServiceTest {
     }
 
     @Test
-    void create_shouldCreateBookingAndDecreaseHotelAvailability() {
+    void create_shouldCreateBookingDecreaseHotelAvailabilityAndMarkEmailAsSent() {
         User user = saveUser("david@example.com", "12345678A");
         Hotel hotel = saveHotel(4, new BigDecimal("80.00"), new BigDecimal("120.00"));
+        when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(true);
 
         BookingResponse created = bookingService.create(new BookingCreateRequest(
                 user.getId(),
@@ -79,11 +90,34 @@ class BookingServiceTest {
         assertThat(created.tickets()).extracting(ticket -> ticket.ageRange())
                 .containsExactlyInAnyOrder("ADULT", "CHILD");
         assertThat(created.totalPrice()).isEqualByComparingTo("215.00");
-        assertThat(created.emailSent()).isFalse();
+        assertThat(created.emailSent()).isTrue();
         assertThat(created.createdAt()).isNotNull();
+
+        verify(notificationService).sendBookingConfirmation(eq(List.of("david@example.com")), any(BookingResponse.class));
 
         Hotel updatedHotel = hotelRepository.findById(hotel.getId()).orElseThrow();
         assertThat(updatedHotel.getAvailablePlaces()).isEqualTo(2);
+    }
+
+    @Test
+    void create_shouldKeepEmailSentFalse_whenNotificationFails() {
+        User user = saveUser("david@example.com", "12345678A");
+        Hotel hotel = saveHotel(4, new BigDecimal("80.00"), new BigDecimal("120.00"));
+        when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(false);
+
+        BookingResponse created = bookingService.create(new BookingCreateRequest(
+                user.getId(),
+                null,
+                hotel.getId(),
+                "FULL_BOARD",
+                LocalDate.parse("2026-05-22"),
+                List.of(
+                        new CompanionRequest("Ana", "Garcia", LocalDate.parse("1988-03-10")),
+                        new CompanionRequest("Lucas", "Garcia", LocalDate.parse("2015-07-20"))
+                )
+        ));
+
+        assertThat(created.emailSent()).isFalse();
     }
 
     @Test

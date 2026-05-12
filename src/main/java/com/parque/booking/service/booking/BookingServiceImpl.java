@@ -5,6 +5,7 @@ import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.BookingSummaryResponse;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.dto.TicketResponse;
+import com.parque.booking.service.notification.NotificationService;
 import com.parque.booking.model.Booking;
 import com.parque.booking.repository.BookingRepository;
 import com.parque.entity.Ticket;
@@ -26,9 +27,7 @@ import java.time.LocalDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -42,18 +41,19 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final HotelRepository hotelRepository;
     private final OfferRepository offerRepository;
-
-    private static final Logger log = LoggerFactory.getLogger(BookingServiceImpl.class);
+    private final Optional<NotificationService> notificationService;
 
     public BookingServiceImpl(
             BookingRepository bookingRepository,
             UserRepository userRepository,
             HotelRepository hotelRepository,
-            OfferRepository offerRepository) {
+            OfferRepository offerRepository,
+            Optional<NotificationService> notificationService) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.hotelRepository = hotelRepository;
         this.offerRepository = offerRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
@@ -93,6 +93,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking saved = bookingRepository.saveAndFlush(booking);
+        saved.setEmailSent(sendBookingConfirmation(user, toResponse(saved)));
         return toResponse(saved);
     }
 
@@ -269,6 +270,15 @@ public class BookingServiceImpl implements BookingService {
         return firstName + " " + lastName;
     }
 
+    private boolean sendBookingConfirmation(User user, BookingResponse bookingResponse) {
+        if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
+            return false;
+        }
+
+        return notificationService
+                .map(service -> service.sendBookingConfirmation(List.of(user.getEmail()), bookingResponse))
+                .orElse(false);
+    }
 
     public ArrayList<String> AddParticipantsToBok(ArrayList<String> emailsParticipants, Booking book) {
         book.getEmailsParticipants().addAll(emailsParticipants);
