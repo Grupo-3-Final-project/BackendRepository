@@ -3,6 +3,7 @@ package com.parque.booking;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.CompanionRequest;
+import com.parque.booking.model.Booking;
 import com.parque.booking.repository.BookingRepository;
 import com.parque.booking.service.booking.BookingService;
 import com.parque.booking.service.notification.NotificationService;
@@ -66,7 +67,7 @@ class BookingServiceTest {
     void create_shouldCreateBookingDecreaseHotelAvailabilityAndMarkEmailAsSent() {
         User user = saveUser("david@example.com", "12345678A");
         Hotel hotel = saveHotel(4, new BigDecimal("80.00"), new BigDecimal("120.00"));
-        when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(true);
+        when(notificationService.sendBookingConfirmation(anyList(), any(Booking.class))).thenReturn(true);
 
         BookingResponse created = bookingService.create(new BookingCreateRequest(
                 user.getId(),
@@ -93,7 +94,7 @@ class BookingServiceTest {
         assertThat(created.emailSent()).isTrue();
         assertThat(created.createdAt()).isNotNull();
 
-        verify(notificationService).sendBookingConfirmation(eq(List.of("david@example.com")), any(BookingResponse.class));
+        verify(notificationService).sendBookingConfirmation(eq(List.of("david@example.com")), any(Booking.class));
 
         Hotel updatedHotel = hotelRepository.findById(hotel.getId()).orElseThrow();
         assertThat(updatedHotel.getAvailablePlaces()).isEqualTo(2);
@@ -103,7 +104,7 @@ class BookingServiceTest {
     void create_shouldKeepEmailSentFalse_whenNotificationFails() {
         User user = saveUser("david@example.com", "12345678A");
         Hotel hotel = saveHotel(4, new BigDecimal("80.00"), new BigDecimal("120.00"));
-        when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(false);
+        when(notificationService.sendBookingConfirmation(anyList(), any(Booking.class))).thenReturn(false);
 
         BookingResponse created = bookingService.create(new BookingCreateRequest(
                 user.getId(),

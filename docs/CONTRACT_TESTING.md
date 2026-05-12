@@ -146,6 +146,10 @@ El frontend no debe depender de trazas internas, nombres de excepciones Java ni 
 | Reservas | `POST /api/bookings` | Compra con acompanantes y total calculado |
 | Reservas | `POST /api/bookings` | Error si el hotel esta completo |
 | Reservas | `POST /api/bookings` | Error si un menor viaja sin adulto |
+| Tickets | `GET /api/tickets/mobile/{mobileAccessToken}` | Ticket valido y catalogo base de atracciones |
+| Tickets | `POST /api/tickets/entry/{entryToken}/validate` | Validacion de QR de entrada y cambio a `USED` |
+| Tickets | `POST /api/tickets/entry/{entryToken}/validate` | Error si el ticket ya fue usado |
+| Tiempo | `GET /api/weather/granada` | Payload normalizado del tiempo actual de Granada |
 | Auth interna | `POST /api/auth/login` | Login valido y JWT Bearer |
 | Auth interna | `POST /api/auth/login` | `401` si las credenciales no son validas |
 | Seguridad interna | Endpoints protegidos | `401` si falta token Bearer |
@@ -166,6 +170,26 @@ Los tests deben cubrir que:
 - Un menor no puede viajar si no esta acompanado de un adulto.
 - El total de la compra se calcula correctamente.
 - La respuesta de reserva incluye `tickets`, `totalPrice`, `emailSent` y `createdAt`.
+- Si el correo falla, la reserva sigue existiendo y `emailSent` informa del resultado.
+- Los QR de entrada y acceso movil existen a nivel de ticket, aunque no se expongan en el JSON de reserva.
+
+### Tickets y acceso movil
+
+Los tests deben cubrir que:
+
+- El acceso movil por token devuelve `ticketId`, `bookingId`, `holderFullName`, `ticketStatus`, `visitDate` y `attractions`.
+- La validacion de entrada cambia el estado del ticket a `USED`.
+- Un ticket ya usado devuelve `409 Conflict`.
+- Un ticket cancelado devuelve `409 Conflict`.
+- Un ticket inexistente devuelve `404 Not Found`.
+
+### Tiempo de Granada
+
+Los tests deben cubrir que:
+
+- El endpoint devuelve `city`, `temperatureCelsius`, `apparentTemperatureCelsius`, `condition`, `day` y `updatedAt`.
+- El backend encapsula la API meteorologica externa y expone un payload estable para frontend.
+- Si falla el proveedor meteorologico, la API devuelve un error controlado.
 
 ### Hoteles
 
@@ -293,6 +317,57 @@ Los tests deben cubrir que:
 }
 ```
 
+### Acceso movil por ticket
+
+```json
+{
+  "ticketId": 14,
+  "bookingId": 3,
+  "holderFullName": "Ana Garcia",
+  "ticketStatus": "VALID",
+  "visitDate": "2026-05-22",
+  "attractions": [
+    {
+      "id": 1,
+      "name": "Dragon Coaster",
+      "description": "Montana rusa principal del parque.",
+      "size": "LARGE",
+      "status": "OPEN",
+      "totalSeats": 32,
+      "availableSeats": 28,
+      "maintenanceFrequencyDays": 7,
+      "imageUrl": "https://example.com/attraction.jpg"
+    }
+  ]
+}
+```
+
+### Validacion de entrada
+
+```json
+{
+  "ticketId": 14,
+  "bookingId": 3,
+  "holderFullName": "Ana Garcia",
+  "ticketStatus": "USED",
+  "visitDate": "2026-05-22",
+  "usedAt": "2026-05-22T10:30:00"
+}
+```
+
+### Tiempo de Granada
+
+```json
+{
+  "city": "Granada",
+  "temperatureCelsius": 24.5,
+  "apparentTemperatureCelsius": 26.0,
+  "condition": "Poco nuboso",
+  "day": true,
+  "updatedAt": "2026-05-22T10:30:00"
+}
+```
+
 ## 10. Casos de error minimos
 
 ### Usuario duplicado
@@ -357,6 +432,43 @@ POST /api/bookings
 Error esperado:
 
 - `409 Conflict`: `A minor cannot travel without an adult`
+
+### Ticket ya usado
+
+Endpoint:
+
+```text
+POST /api/tickets/entry/{entryToken}/validate
+```
+
+Error esperado:
+
+- `409 Conflict`: `Ticket already used`
+
+### Ticket inexistente
+
+Endpoints:
+
+```text
+GET /api/tickets/mobile/{mobileAccessToken}
+POST /api/tickets/entry/{entryToken}/validate
+```
+
+Errores esperados:
+
+- `404 Not Found`: `Ticket not found`
+
+### Tiempo de Granada no disponible
+
+Endpoint:
+
+```text
+GET /api/weather/granada
+```
+
+Error esperado:
+
+- `500 Internal Server Error`: `Weather service unavailable`
 
 ### Recurso inexistente
 

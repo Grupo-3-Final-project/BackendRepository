@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.CompanionRequest;
+import com.parque.booking.model.Booking;
 import com.parque.booking.repository.BookingRepository;
-import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.service.notification.NotificationService;
 import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
@@ -80,7 +80,7 @@ class BookingControllerIT {
         hotelRepository.deleteAll();
         userRepository.deleteAll();
         InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
-        when(notificationService.sendBookingConfirmation(anyList(), any(BookingResponse.class))).thenReturn(true);
+        when(notificationService.sendBookingConfirmation(anyList(), any(Booking.class))).thenReturn(true);
     }
 
     @Test

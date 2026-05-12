@@ -1,5 +1,7 @@
 package com.parque.entity;
 
+import com.parque.booking.model.Booking;
+import com.parque.booking.model.TicketStatus;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -8,8 +10,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-
-import com.parque.booking.model.Booking;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tickets")
@@ -38,4 +39,19 @@ public class Ticket {
     @NotNull
     @Positive
     private BigDecimal price;
+
+    @NotBlank
+    @Column(nullable = false, unique = true, length = 64)
+    private String entryToken;
+
+    @NotBlank
+    @Column(nullable = false, unique = true, length = 64)
+    private String mobileAccessToken;
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TicketStatus status;
+
+    private LocalDateTime usedAt;
 }
