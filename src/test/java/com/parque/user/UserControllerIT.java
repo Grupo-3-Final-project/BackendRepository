@@ -177,10 +177,6 @@ class UserControllerIT {
                 .toEntity(String.class);
     }
 
-    private String url(String path) {
-        return "http://localhost:" + port + path;
-    }
-
     private RestClient restClient() {
         return RestClient.builder()
                 .baseUrl("http://localhost:" + port)

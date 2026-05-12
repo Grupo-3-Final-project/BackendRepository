@@ -1,6 +1,5 @@
 package com.parque.config;
 
-import com.parque.auth.model.InternalRole;
 import com.parque.security.ApiAuthenticationEntryPoint;
 import com.parque.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +16,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
