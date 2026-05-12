@@ -56,7 +56,7 @@ public class NotificationService {
         for (Ticket ticket : booking.getTickets()) {
             inlineImages.put(
                     entryQrId(ticket),
-                    qrCodeService.generateQrCode(qrCodeService.buildEntryQrContent(ticket.getEntryToken()))
+                    qrCodeService.generateQrCode(qrCodeService.buildEntryAccessUrl(ticket.getEntryToken()))
             );
             inlineImages.put(
                     mobileQrId(ticket),
@@ -93,6 +93,9 @@ public class NotificationService {
                 builder.append("<td style=\"width:50%;padding-right:8px;vertical-align:top;\">");
                 builder.append("<p style=\"margin:0 0 8px 0;font-weight:bold;\">QR de entrada</p>");
                 builder.append("<img alt=\"QR de entrada\" src=\"cid:").append(entryQrId(ticket)).append("\" style=\"display:block;width:180px;height:180px;background:#fff;border-radius:12px;padding:8px;\"/>");
+                builder.append("<p style=\"margin:12px 0 0 0;color:#d6d3d1;word-break:break-word;\">")
+                        .append(qrCodeService.buildEntryAccessUrl(ticket.getEntryToken()))
+                        .append("</p>");
                 builder.append("</td>");
                 builder.append("<td style=\"width:50%;padding-left:8px;vertical-align:top;\">");
                 builder.append("<p style=\"margin:0 0 8px 0;font-weight:bold;\">QR de acceso movil</p>");
