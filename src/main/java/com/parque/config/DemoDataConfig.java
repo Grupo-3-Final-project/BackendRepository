@@ -64,7 +64,18 @@ public class DemoDataConfig {
         return args -> {
             seedInternalCredential(internalCredentialRepository, passwordEncoder);
 
-            if (userRepository.count() > 0 || hotelRepository.count() > 0 || bookingRepository.count() > 0) {
+            Hotel magicPark = syncHotel(hotelRepository, demoMagicParkHotel());
+            Hotel adventure = syncHotel(hotelRepository, demoAdventureHotel());
+            Hotel fantasy = syncHotel(hotelRepository, demoFantasyHotel());
+
+            syncAttraction(attractionRepository, demoDragonCoasterAttraction());
+            syncAttraction(attractionRepository, demoSplashRiverAttraction());
+            syncAttraction(attractionRepository, demoFantasyCarouselAttraction());
+
+            syncOffer(offerRepository, demoMagicParkOffer(magicPark));
+            syncOffer(offerRepository, demoAdventureOffer(adventure));
+
+            if (userRepository.count() > 0 || bookingRepository.count() > 0 || employeeRepository.count() > 0) {
                 return;
             }
 
@@ -86,75 +97,6 @@ public class DemoDataConfig {
                     .birthDate(LocalDate.parse("1988-03-10"))
                     .build());
 
-            Hotel magicPark = hotelRepository.save(Hotel.builder()
-                    .name("Hotel Magic Park")
-                    .description("Hotel familiar situado junto al parque.")
-                    .totalRooms(120)
-                    .availableRooms(120)
-                    .totalPlaces(240)
-                    .availablePlaces(240)
-                    .halfBoardPrice(new BigDecimal("80.00"))
-                    .fullBoardPrice(new BigDecimal("120.00"))
-                    .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778153079/hotels/publicHomeHeroGate_sytdho.png")
-                    .build());
-
-            Hotel adventure = hotelRepository.save(Hotel.builder()
-                    .name("Hotel Adventure")
-                    .description("Hotel tematizado para estancias cortas.")
-                    .totalRooms(90)
-                    .availableRooms(90)
-                    .totalPlaces(180)
-                    .availablePlaces(180)
-                    .halfBoardPrice(new BigDecimal("70.00"))
-                    .fullBoardPrice(new BigDecimal("110.00"))
-                    .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/hotels/publicHomeParkMap_d23ikl.png")
-                    .build());
-
-            Hotel fantasy = hotelRepository.save(Hotel.builder()
-                    .name("Hotel Fantasy")
-                    .description("Hotel premium para familias.")
-                    .totalRooms(80)
-                    .availableRooms(80)
-                    .totalPlaces(160)
-                    .availablePlaces(160)
-                    .halfBoardPrice(new BigDecimal("65.00"))
-                    .fullBoardPrice(new BigDecimal("95.00"))
-                    .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778234157/hotels/chef_bbsbqp.jpg")
-                    .build());
-
-            attractionRepository.saveAll(List.of(
-                    Attraction.builder()
-                            .name("Dragon Coaster")
-                            .description("Montana rusa principal del parque.")
-                            .size("LARGE")
-                            .status("OPEN")
-                            .totalSeats(32)
-                            .availableSeats(32)
-                            .maintenanceFrequencyDays(7)
-                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778222227/attractions/attractionTerrorTower_hbkqm6.png")
-                            .build(),
-                    Attraction.builder()
-                            .name("Splash River")
-                            .description("Recorrido acuatico familiar.")
-                            .size("MEDIUM")
-                            .status("OPEN")
-                            .totalSeats(24)
-                            .availableSeats(24)
-                            .maintenanceFrequencyDays(14)
-                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778221870/attractions/attractionBloodRiver_kx4mxb.png")
-                            .build(),
-                    Attraction.builder()
-                            .name("Fantasy Carousel")
-                            .description("Atraccion infantil del area fantasy.")
-                            .size("SMALL")
-                            .status("OPEN")
-                            .totalSeats(18)
-                            .availableSeats(18)
-                            .maintenanceFrequencyDays(30)
-                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778221799/attractions/attractionDarkLabyrinth_yqjgnt.png")
-                            .build()
-            ));
-
             employeeRepository.saveAll(List.of(
                     employee("Laura", "Gomez", "11111111A", "laura.gomez@example.com", "TECHNICIAN", "MORNING"),
                     employee("Mario", "Lopez", "22222222B", "mario.lopez@example.com", "TECHNICIAN", "AFTERNOON"),
@@ -165,27 +107,6 @@ public class DemoDataConfig {
                     employee("Elena", "Perez", "77777777G", "elena.perez@example.com", "ANIMATOR", "MORNING"),
                     employee("Diego", "Moreno", "88888888H", "diego.moreno@example.com", "ANIMATOR", "AFTERNOON"),
                     employee("Sofia", "Navarro", "99999999J", "sofia.navarro@example.com", "ANIMATOR", "MORNING")
-            ));
-
-            offerRepository.saveAll(List.of(
-                    Offer.builder()
-                            .title("Escapada Familiar Magic Park")
-                            .description("Hotel + entradas para una escapada de fin de semana.")
-                            .hotel(magicPark)
-                            .boardType("FULL_BOARD")
-                            .includedTickets(4)
-                            .totalPrice(new BigDecimal("399.99"))
-                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerHotelTicket_d8hvg3.png")
-                            .build(),
-                    Offer.builder()
-                            .title("Oferta Aventura")
-                            .description("Hotel + entradas para dos adultos y un nino.")
-                            .hotel(adventure)
-                            .boardType("HALF_BOARD")
-                            .includedTickets(3)
-                            .totalPrice(new BigDecimal("249.99"))
-                            .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerFamilyPack_tzegmw.png")
-                            .build()
             ));
 
             bookingService.create(new BookingCreateRequest(
@@ -241,7 +162,6 @@ public class DemoDataConfig {
             return;
         }
 
-        // Create demo users with different roles
         internalCredentialRepository.save(InternalCredential.builder()
                 .username(demoAdminUsername)
                 .email(demoAdminEmail)
@@ -250,7 +170,6 @@ public class DemoDataConfig {
                 .active(true)
                 .build());
 
-        // Manager user
         internalCredentialRepository.save(InternalCredential.builder()
                 .username("manager")
                 .email("manager@parque.local")
@@ -259,7 +178,6 @@ public class DemoDataConfig {
                 .active(true)
                 .build());
 
-        // Employee user
         internalCredentialRepository.save(InternalCredential.builder()
                 .username("employee")
                 .email("employee@parque.local")
@@ -268,7 +186,6 @@ public class DemoDataConfig {
                 .active(true)
                 .build());
 
-        // Regular user
         internalCredentialRepository.save(InternalCredential.builder()
                 .username("user")
                 .email("user@parque.local")
@@ -276,6 +193,155 @@ public class DemoDataConfig {
                 .role(InternalRole.USER)
                 .active(true)
                 .build());
+    }
+
+    private Hotel syncHotel(HotelRepository hotelRepository, Hotel demoHotel) {
+        Hotel hotel = hotelRepository.findByName(demoHotel.getName())
+                .map(existingHotel -> {
+                    existingHotel.setDescription(demoHotel.getDescription());
+                    existingHotel.setHalfBoardPrice(demoHotel.getHalfBoardPrice());
+                    existingHotel.setFullBoardPrice(demoHotel.getFullBoardPrice());
+                    existingHotel.setImageUrl(demoHotel.getImageUrl());
+                    return existingHotel;
+                })
+                .orElse(demoHotel);
+
+        return hotelRepository.save(hotel);
+    }
+
+    private Attraction syncAttraction(AttractionRepository attractionRepository, Attraction demoAttraction) {
+        Attraction attraction = attractionRepository.findByName(demoAttraction.getName())
+                .map(existingAttraction -> {
+                    existingAttraction.setDescription(demoAttraction.getDescription());
+                    existingAttraction.setSize(demoAttraction.getSize());
+                    existingAttraction.setImageUrl(demoAttraction.getImageUrl());
+                    existingAttraction.setMaintenanceFrequencyDays(demoAttraction.getMaintenanceFrequencyDays());
+                    return existingAttraction;
+                })
+                .orElse(demoAttraction);
+
+        return attractionRepository.save(attraction);
+    }
+
+    private Offer syncOffer(OfferRepository offerRepository, Offer demoOffer) {
+        Offer offer = offerRepository.findByTitle(demoOffer.getTitle())
+                .map(existingOffer -> {
+                    existingOffer.setDescription(demoOffer.getDescription());
+                    existingOffer.setHotel(demoOffer.getHotel());
+                    existingOffer.setBoardType(demoOffer.getBoardType());
+                    existingOffer.setIncludedTickets(demoOffer.getIncludedTickets());
+                    existingOffer.setTotalPrice(demoOffer.getTotalPrice());
+                    existingOffer.setImageUrl(demoOffer.getImageUrl());
+                    return existingOffer;
+                })
+                .orElse(demoOffer);
+
+        return offerRepository.save(offer);
+    }
+
+    private Hotel demoMagicParkHotel() {
+        return Hotel.builder()
+                .name("Hotel Magic Park")
+                .description("Hotel familiar situado junto al parque.")
+                .totalRooms(120)
+                .availableRooms(120)
+                .totalPlaces(240)
+                .availablePlaces(240)
+                .halfBoardPrice(new BigDecimal("80.00"))
+                .fullBoardPrice(new BigDecimal("120.00"))
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778153079/hotels/publicHomeHeroGate_sytdho.png")
+                .build();
+    }
+
+    private Hotel demoAdventureHotel() {
+        return Hotel.builder()
+                .name("Hotel Adventure")
+                .description("Hotel tematizado para estancias cortas.")
+                .totalRooms(90)
+                .availableRooms(90)
+                .totalPlaces(180)
+                .availablePlaces(180)
+                .halfBoardPrice(new BigDecimal("70.00"))
+                .fullBoardPrice(new BigDecimal("110.00"))
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/hotels/publicHomeParkMap_d23ikl.png")
+                .build();
+    }
+
+    private Hotel demoFantasyHotel() {
+        return Hotel.builder()
+                .name("Hotel Fantasy")
+                .description("Hotel premium para familias.")
+                .totalRooms(80)
+                .availableRooms(80)
+                .totalPlaces(160)
+                .availablePlaces(160)
+                .halfBoardPrice(new BigDecimal("65.00"))
+                .fullBoardPrice(new BigDecimal("95.00"))
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778234157/hotels/chef_bbsbqp.jpg")
+                .build();
+    }
+
+    private Attraction demoDragonCoasterAttraction() {
+        return Attraction.builder()
+                .name("Dragon Coaster")
+                .description("Montana rusa principal del parque.")
+                .size("LARGE")
+                .status("OPEN")
+                .totalSeats(32)
+                .availableSeats(32)
+                .maintenanceFrequencyDays(7)
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778222227/attractions/attractionTerrorTower_hbkqm6.png")
+                .build();
+    }
+
+    private Attraction demoSplashRiverAttraction() {
+        return Attraction.builder()
+                .name("Splash River")
+                .description("Recorrido acuatico familiar.")
+                .size("MEDIUM")
+                .status("OPEN")
+                .totalSeats(24)
+                .availableSeats(24)
+                .maintenanceFrequencyDays(14)
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778221870/attractions/attractionBloodRiver_kx4mxb.png")
+                .build();
+    }
+
+    private Attraction demoFantasyCarouselAttraction() {
+        return Attraction.builder()
+                .name("Fantasy Carousel")
+                .description("Atraccion infantil del area fantasy.")
+                .size("SMALL")
+                .status("OPEN")
+                .totalSeats(18)
+                .availableSeats(18)
+                .maintenanceFrequencyDays(30)
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778221799/attractions/attractionDarkLabyrinth_yqjgnt.png")
+                .build();
+    }
+
+    private Offer demoMagicParkOffer(Hotel hotel) {
+        return Offer.builder()
+                .title("Escapada Familiar Magic Park")
+                .description("Hotel + entradas para una escapada de fin de semana.")
+                .hotel(hotel)
+                .boardType("FULL_BOARD")
+                .includedTickets(4)
+                .totalPrice(new BigDecimal("399.99"))
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerHotelTicket_d8hvg3.png")
+                .build();
+    }
+
+    private Offer demoAdventureOffer(Hotel hotel) {
+        return Offer.builder()
+                .title("Oferta Aventura")
+                .description("Hotel + entradas para dos adultos y un nino.")
+                .hotel(hotel)
+                .boardType("HALF_BOARD")
+                .includedTickets(3)
+                .totalPrice(new BigDecimal("249.99"))
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerFamilyPack_tzegmw.png")
+                .build();
     }
 
     private Employee employee(

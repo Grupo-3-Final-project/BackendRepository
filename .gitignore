@@ -33,3 +33,5 @@ build/
 .vscode/
 
 .env
+backend-dev.out.log
+backend-dev.err.log
