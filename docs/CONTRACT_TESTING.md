@@ -143,6 +143,8 @@ El frontend no debe depender de trazas internas, nombres de excepciones Java ni 
 | Hoteles | `GET /api/hotels` | Campos correctos del hotel, incluyendo `totalPlaces` y `availablePlaces` |
 | Atracciones | `GET /api/attractions` | Campos correctos de atraccion, incluyendo `totalSeats` y `availableSeats` |
 | Empleados | `GET /api/employees` | `dni`, `employeeType` y `shift` |
+| Ofertas | `PUT /api/offers/{id}` | Actualizacion correcta del pack comercial |
+| Ofertas | `DELETE /api/offers/{id}` | Eliminacion correcta sin body |
 | Reservas | `POST /api/bookings` | Compra con acompanantes y total calculado |
 | Reservas | `POST /api/bookings` | Error si el hotel esta completo |
 | Reservas | `POST /api/bookings` | Error si un menor viaja sin adulto |
@@ -365,6 +367,7 @@ Endpoints de detalle o reservas:
 ```text
 GET /api/users/{id}
 GET /api/hotels/{id}
+GET /api/offers/{id}
 GET /api/bookings/{id}
 POST /api/bookings
 ```
@@ -373,6 +376,7 @@ Errores esperados:
 
 - `404 Not Found`: `User not found`
 - `404 Not Found`: `Hotel not found`
+- `404 Not Found`: `Offer not found`
 
 ### Turnos sin empleados suficientes
 
