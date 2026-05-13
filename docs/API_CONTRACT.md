@@ -703,6 +703,54 @@ Response `201 Created`:
 }
 ```
 
+### PUT /api/offers/{id}
+
+Actualiza una oferta existente.
+
+Request:
+
+```json
+{
+  "title": "Oferta Familiar Premium",
+  "description": "Hotel + entradas para 2 adultos y 2 ninos con mejoras.",
+  "hotelId": 1,
+  "boardType": "HALF_BOARD",
+  "includedTickets": 5,
+  "totalPrice": 449.99,
+  "imageUrl": "https://example.com/offer-premium.jpg"
+}
+```
+
+`PUT /api/offers/{id}` requiere autenticacion interna con JWT.
+
+Response `200 OK`:
+
+```json
+{
+  "id": 1,
+  "title": "Oferta Familiar Premium",
+  "description": "Hotel + entradas para 2 adultos y 2 ninos con mejoras.",
+  "hotelId": 1,
+  "hotelName": "Hotel Magic Park",
+  "boardType": "HALF_BOARD",
+  "includedTickets": 5,
+  "totalPrice": 449.99,
+  "imageUrl": "https://example.com/offer-premium.jpg"
+}
+```
+
+### DELETE /api/offers/{id}
+
+Elimina una oferta.
+
+`DELETE /api/offers/{id}` requiere autenticacion interna con JWT.
+
+Response:
+
+```text
+204 No Content
+```
+
 ## 8. Compra y reserva
 
 Este contrato es critico porque conecta varios criterios de aceptacion.

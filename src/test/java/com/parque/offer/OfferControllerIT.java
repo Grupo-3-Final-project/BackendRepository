@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.parque.hotel.model.Hotel;
 import com.parque.hotel.repository.HotelRepository;
 import com.parque.offer.dto.OfferCreateRequest;
+import com.parque.offer.dto.OfferUpdateRequest;
 import com.parque.offer.repository.OfferRepository;
 import com.parque.testconfig.JacksonTestConfig;
 import com.parque.testsupport.InternalAuthSupport;
@@ -138,6 +139,80 @@ class OfferControllerIT {
         for (String field : fields) {
             assertThat(body.get(0).hasNonNull(field)).isTrue();
         }
+    }
+
+    @Test
+    void putOffers_shouldReturn200AndUpdatedOffer() throws Exception {
+        OfferCreateRequest createRequest = new OfferCreateRequest(
+                "Oferta Familiar Magic Park",
+                "Hotel + entradas para 2 adultos y 2 ninos.",
+                hotelId,
+                "FULL_BOARD",
+                4,
+                new BigDecimal("399.99"),
+                "https://example.com/offer.jpg"
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/offers", objectMapper.writeValueAsString(createRequest));
+        assertThat(createdResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        long offerId = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        OfferUpdateRequest updateRequest = new OfferUpdateRequest(
+                "Oferta Familiar Premium",
+                "Hotel + entradas para 2 adultos y 2 ninos con mejoras.",
+                hotelId,
+                "HALF_BOARD",
+                5,
+                new BigDecimal("449.99"),
+                "https://example.com/offer-premium.jpg"
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.CONTENT_TYPE, "application/json");
+        headers.setBearerAuth(authToken());
+        ResponseEntity<String> response = restClient()
+                .put()
+                .uri("/api/offers/" + offerId)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .body(objectMapper.writeValueAsString(updateRequest))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("id").asLong()).isEqualTo(offerId);
+        assertThat(body.get("title").asText()).isEqualTo("Oferta Familiar Premium");
+        assertThat(body.get("boardType").asText()).isEqualTo("HALF_BOARD");
+        assertThat(body.get("includedTickets").asInt()).isEqualTo(5);
+        assertThat(body.get("totalPrice").asDouble()).isEqualTo(449.99);
+        assertThat(body.get("imageUrl").asText()).isEqualTo("https://example.com/offer-premium.jpg");
+    }
+
+    @Test
+    void deleteOffers_shouldReturn204AndRemoveOffer() throws Exception {
+        OfferCreateRequest request = new OfferCreateRequest(
+                "Oferta Familiar Magic Park",
+                "Hotel + entradas para 2 adultos y 2 ninos.",
+                hotelId,
+                "FULL_BOARD",
+                4,
+                new BigDecimal("399.99"),
+                "https://example.com/offer.jpg"
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/offers", objectMapper.writeValueAsString(request));
+        assertThat(createdResponse.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+        long offerId = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(authToken());
+        ResponseEntity<Void> response = restClient()
+                .delete()
+                .uri("/api/offers/" + offerId)
+                .headers(httpHeaders -> httpHeaders.addAll(headers))
+                .retrieve()
+                .toBodilessEntity();
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(offerRepository.existsById(offerId)).isFalse();
     }
 
     @Test
