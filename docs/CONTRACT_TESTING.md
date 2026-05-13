@@ -151,6 +151,7 @@ El frontend no debe depender de trazas internas, nombres de excepciones Java ni 
 | Auth interna | `POST /api/auth/login` | Login valido y JWT Bearer |
 | Auth interna | `POST /api/auth/login` | `401` si las credenciales no son validas |
 | Seguridad interna | Endpoints protegidos | `401` si falta token Bearer |
+| Tiempo | `GET /api/weather/granada` | Payload actual de tiempo de Granada |
 | Dashboard | `GET /api/dashboard/tickets-by-age-range` | Metrica por rango de edad |
 | Dashboard | `GET /api/dashboard/current-year-revenue` | Recaudacion anual |
 | Dashboard | `GET /api/dashboard/top-hotels` | Top 3 hoteles por recaudacion |
@@ -206,6 +207,14 @@ Los tests deben cubrir que:
 - Se calcula el total ganado en el ano en curso.
 - Se obtienen los 3 hoteles que mas recaudan en el ano indicado.
 - Las metricas se calculan en backend y el frontend solo las muestra.
+
+### Tiempo
+
+Los tests deben cubrir que:
+
+- El endpoint `GET /api/weather/granada` devuelve `200 OK` cuando el proveedor responde.
+- La respuesta expone `city`, `temperatureCelsius`, `apparentTemperatureCelsius`, `condition`, `day` y `updatedAt`.
+- Si el proveedor externo falla, el backend responde con error controlado.
 
 ## 9. Campos criticos por response
 
