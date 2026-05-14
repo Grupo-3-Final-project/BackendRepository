@@ -1,114 +1,90 @@
 package com.parque.dashboard;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.parque.auth.repository.InternalCredentialRepository;
+import com.parque.testconfig.JacksonTestConfig;
+import com.parque.testsupport.InternalAuthSupport;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.web.client.RestClient;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
+@Import(JacksonTestConfig.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 class DashboardIntegrationTest {
 
+    @LocalServerPort
+    private int port;
+
     @Autowired
-    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
 
-    private static final String API_BASE = "/api";
-    private static final String ADMIN_TOKEN = "demo-admin-token";
+    @Autowired
+    private InternalCredentialRepository internalCredentialRepository;
 
-    @Test
-    void testDashboardMetrics_AfterBooking() throws Exception {
-        // Step 1: Create a booking (simulate)
-        String bookingJson = """
-                {
-                    "userId": 1,
-                    "hotelId": 1,
-                    "checkInDate": "2026-05-15",
-                    "checkOutDate": "2026-05-20",
-                    "totalPrice": 500.00,
-                    "numberOfGuests": 2
-                }
-                """;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-        mockMvc.perform(post(API_BASE + "/bookings")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(bookingJson)
-                .header("Authorization", "Bearer " + ADMIN_TOKEN))
-                .andExpect(status().isCreated());
-
-        // Step 2: Query dashboard for updated metrics
-        mockMvc.perform(get(API_BASE + "/dashboard/metrics")
-                .header("Authorization", "Bearer " + ADMIN_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalRevenue").exists())
-                .andExpect(jsonPath("$.totalBookings").exists())
-                .andExpect(jsonPath("$.occupancyRate").exists());
+    @BeforeEach
+    void setUp() {
+        InternalAuthSupport.ensureAdminCredential(internalCredentialRepository, passwordEncoder);
     }
 
     @Test
-    void testDashboardRevenuCalculation() throws Exception {
-        // Revenue should be calculated correctly after bookings
-        mockMvc.perform(get(API_BASE + "/dashboard/revenue")
-                .header("Authorization", "Bearer " + ADMIN_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalRevenue").isNumber())
-                .andExpect(jsonPath("$.period").exists());
+    void dashboardSummary_shouldRequireInternalAuthentication() throws Exception {
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/dashboard/summary?year=" + LocalDate.now().getYear())
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("message").asText()).isEqualTo("Authentication is required");
     }
 
     @Test
-    void testDashboardOccupancyRate() throws Exception {
-        // Occupancy rate calculation
-        mockMvc.perform(get(API_BASE + "/dashboard/occupancy")
-                .header("Authorization", "Bearer " + ADMIN_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.occupancyRate").isNumber())
-                .andExpect(jsonPath("$.totalRooms").isNumber())
-                .andExpect(jsonPath("$.occupiedRooms").isNumber());
+    void dashboardRevenue_shouldReturnMetrics_whenAuthenticated() throws Exception {
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/dashboard/current-year-revenue")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("year").asInt()).isEqualTo(LocalDate.now().getYear());
+        assertThat(body.get("totalRevenue").isNumber()).isTrue();
     }
 
-    @Test
-    void testDashboardUnauthorizedAccess() throws Exception {
-        // Dashboard should require authentication
-        mockMvc.perform(get(API_BASE + "/dashboard/metrics"))
-                .andExpect(status().isUnauthorized());
+    private RestClient restClient() {
+        return RestClient.builder()
+                .baseUrl("http://localhost:" + port)
+                .defaultStatusHandler(HttpStatusCode::isError, (request, response) -> {
+                })
+                .build();
     }
 
-    @Test
-    void testDashboardForbiddenAccess() throws Exception {
-        // Dashboard should require ADMIN role
-        String userToken = "demo-user-token";
-        mockMvc.perform(get(API_BASE + "/dashboard/metrics")
-                .header("Authorization", "Bearer " + userToken))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    void testDashboardBookingStats() throws Exception {
-        // Get booking statistics
-        mockMvc.perform(get(API_BASE + "/dashboard/bookings/stats")
-                .header("Authorization", "Bearer " + ADMIN_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalBookings").exists())
-                .andExpect(jsonPath("$.confirmedBookings").exists())
-                .andExpect(jsonPath("$.cancelledBookings").exists())
-                .andExpect(jsonPath("$.averageBookingValue").exists());
-    }
-
-    @Test
-    void testDashboardHotelStats() throws Exception {
-        // Get hotel statistics
-        mockMvc.perform(get(API_BASE + "/dashboard/hotels/stats")
-                .header("Authorization", "Bearer " + ADMIN_TOKEN))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalHotels").isNumber())
-                .andExpect(jsonPath("$.avgOccupancy").isNumber())
-                .andExpect(jsonPath("$.avgPrice").isNumber());
+    private String authToken() {
+        try {
+            return InternalAuthSupport.login(restClient(), objectMapper);
+        } catch (Exception exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 }

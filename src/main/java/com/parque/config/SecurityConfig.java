@@ -1,10 +1,10 @@
 package com.parque.config;
 
-import com.parque.auth.model.InternalRole;
 import com.parque.security.ApiAuthenticationEntryPoint;
 import com.parque.security.filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -41,10 +41,25 @@ public class SecurityConfig {
             .exceptionHandling(exceptionHandling -> exceptionHandling.authenticationEntryPoint(apiAuthenticationEntryPoint))
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/api/**").permitAll()
-                .anyRequest().permitAll()
+                .requestMatchers("/api/v1/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                .requestMatchers("/api/tickets/mobile/**", "/api/tickets/entry/**", "/api/weather/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/hotels/**", "/api/attractions/**", "/api/offers/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/users", "/api/bookings").permitAll()
+                .requestMatchers("/api/users/**").authenticated()
+                .requestMatchers("/api/bookings/**").authenticated()
+                .requestMatchers("/api/hotels/**").authenticated()
+                .requestMatchers("/api/attractions/**").authenticated()
+                .requestMatchers("/api/employees/**").authenticated()
+                .requestMatchers("/api/offers/**").authenticated()
+                .requestMatchers("/api/shifts/**").authenticated()
+                .requestMatchers("/api/maintenance/**").authenticated()
+                .requestMatchers("/api/dashboard/**").authenticated()
+                .requestMatchers("/api/images/**").authenticated()
+                .anyRequest().denyAll()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -1,13 +1,11 @@
 package com.parque.test;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -26,18 +24,17 @@ public abstract class IntegrationTestBase {
     }
 
     protected void validateErrorResponse(MvcResult result, int expectedStatus) throws Exception {
-        // Validate common error structure
         String content = result.getResponse().getContentAsString();
-        assert(content.contains("status"));
-        assert(content.contains("error"));
-        assert(content.contains("message"));
-        assert(content.contains("path"));
-        assert(content.contains("timestamp"));
+        assert result.getResponse().getStatus() == expectedStatus;
+        assert content.contains("status");
+        assert content.contains("error");
+        assert content.contains("message");
+        assert content.contains("path");
+        assert content.contains("timestamp");
     }
 
     protected void validateCommonFields(MvcResult result) throws Exception {
         String content = result.getResponse().getContentAsString();
-        // Base validation that response is valid JSON
-        assert(!content.isEmpty());
+        assert !content.isEmpty();
     }
 }

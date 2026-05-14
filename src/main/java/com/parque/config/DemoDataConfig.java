@@ -31,7 +31,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 @Configuration
 @Profile({"dev", "e2e"})
@@ -72,8 +74,8 @@ public class DemoDataConfig {
             syncAttraction(attractionRepository, demoSplashRiverAttraction());
             syncAttraction(attractionRepository, demoFantasyCarouselAttraction());
 
-            syncOffer(offerRepository, demoMagicParkOffer(magicPark));
-            syncOffer(offerRepository, demoAdventureOffer(adventure));
+            syncOffer(offerRepository, bookingRepository, demoMagicParkOffer(magicPark));
+            syncOffer(offerRepository, bookingRepository, demoAdventureOffer(adventure));
 
             if (userRepository.count() > 0 || bookingRepository.count() > 0 || employeeRepository.count() > 0) {
                 return;
@@ -223,20 +225,53 @@ public class DemoDataConfig {
         return attractionRepository.save(attraction);
     }
 
-    private Offer syncOffer(OfferRepository offerRepository, Offer demoOffer) {
-        Offer offer = offerRepository.findByTitle(demoOffer.getTitle())
-                .map(existingOffer -> {
-                    existingOffer.setDescription(demoOffer.getDescription());
-                    existingOffer.setHotel(demoOffer.getHotel());
-                    existingOffer.setBoardType(demoOffer.getBoardType());
-                    existingOffer.setIncludedTickets(demoOffer.getIncludedTickets());
-                    existingOffer.setTotalPrice(demoOffer.getTotalPrice());
-                    existingOffer.setImageUrl(demoOffer.getImageUrl());
-                    return existingOffer;
-                })
-                .orElse(demoOffer);
+    private Offer syncOffer(OfferRepository offerRepository, BookingRepository bookingRepository, Offer demoOffer) {
+        List<Offer> matchingOffers = offerRepository.findAll().stream()
+                .filter(existingOffer -> matchesDemoOffer(existingOffer, demoOffer))
+                .sorted(Comparator.comparing(Offer::getId))
+                .toList();
 
-        return offerRepository.save(offer);
+        Offer offer = matchingOffers.isEmpty()
+                ? demoOffer
+                : matchingOffers.getFirst();
+
+        offer.setTitle(demoOffer.getTitle());
+        offer.setDescription(demoOffer.getDescription());
+        offer.setHotel(demoOffer.getHotel());
+        offer.setBoardType(demoOffer.getBoardType());
+        offer.setIncludedTickets(demoOffer.getIncludedTickets());
+        offer.setTotalPrice(demoOffer.getTotalPrice());
+        offer.setImageUrl(demoOffer.getImageUrl());
+
+        Offer savedOffer = offerRepository.save(offer);
+
+        matchingOffers.stream()
+                .skip(1)
+                .filter(existingOffer -> !bookingRepository.existsByOfferId(existingOffer.getId()))
+                .forEach(offerRepository::delete);
+
+        return savedOffer;
+    }
+
+    private boolean matchesDemoOffer(Offer existingOffer, Offer demoOffer) {
+        if (existingOffer.getTitle().equals(demoOffer.getTitle())) {
+            return true;
+        }
+
+        if (existingOffer.getImageUrl().equals(demoOffer.getImageUrl())) {
+            return true;
+        }
+
+        return normalizeOfferTitle(existingOffer.getTitle()).equals(normalizeOfferTitle(demoOffer.getTitle()));
+    }
+
+    private String normalizeOfferTitle(String title) {
+        return title == null
+                ? ""
+                : title.toLowerCase(Locale.ROOT)
+                .replaceAll("[^a-z0-9 ]", " ")
+                .replaceAll("\\s+", " ")
+                .trim();
     }
 
     private Hotel demoMagicParkHotel() {

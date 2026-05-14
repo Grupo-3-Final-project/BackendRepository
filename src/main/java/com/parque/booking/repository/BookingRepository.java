@@ -10,6 +10,8 @@ import java.util.Optional;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
+    boolean existsByOfferId(Long offerId);
+
     @Override
     @EntityGraph(attributePaths = {"user", "hotel", "tickets"})
     Optional<Booking> findById(Long id);
