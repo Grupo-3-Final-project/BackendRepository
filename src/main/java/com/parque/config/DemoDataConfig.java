@@ -276,50 +276,50 @@ public class DemoDataConfig {
 
     private Hotel demoMagicParkHotel() {
         return Hotel.builder()
-                .name("Hotel Magic Park")
-                .description("Hotel familiar situado junto al parque.")
+                .name("Hotel Umbral Nocturno")
+                .description("Hotel familiar situado junto al acceso principal, con ambiente oscuro, detalles rojos y una estancia cómoda antes de cruzar la puerta.")
                 .totalRooms(120)
                 .availableRooms(120)
                 .totalPlaces(240)
                 .availablePlaces(240)
                 .halfBoardPrice(new BigDecimal("80.00"))
                 .fullBoardPrice(new BigDecimal("120.00"))
-                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778153079/hotels/publicHomeHeroGate_sytdho.png")
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778588321/hotels/Hotel_Refugio_de_las_Sombras_m7bsct.png")
                 .build();
     }
 
     private Hotel demoAdventureHotel() {
         return Hotel.builder()
-                .name("Hotel Adventure")
-                .description("Hotel tematizado para estancias cortas.")
+                .name("Hotel Sendero Carmesí")
+                .description("Alojamiento temático para escapadas breves, con pasillos de luz roja, estética de misterio y acceso rápido a las zonas del parque.")
                 .totalRooms(90)
                 .availableRooms(90)
                 .totalPlaces(180)
                 .availablePlaces(180)
                 .halfBoardPrice(new BigDecimal("70.00"))
                 .fullBoardPrice(new BigDecimal("110.00"))
-                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/hotels/publicHomeParkMap_d23ikl.png")
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778589573/hotels/Hotel_Mansi%C3%B3n_Cremes%C3%AD_fdxncs.png")
                 .build();
     }
 
     private Hotel demoFantasyHotel() {
         return Hotel.builder()
-                .name("Hotel Fantasy")
-                .description("Hotel premium para familias.")
+                .name("Hotel Refugio de las Sombras")
+                .description("Hotel premium para familias, con habitaciones amplias, ambiente nocturno y una estética cuidada para descansar tras la visita.")
                 .totalRooms(80)
                 .availableRooms(80)
                 .totalPlaces(160)
                 .availablePlaces(160)
                 .halfBoardPrice(new BigDecimal("65.00"))
                 .fullBoardPrice(new BigDecimal("95.00"))
-                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778234157/hotels/chef_bbsbqp.jpg")
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778588939/hotels/Hotel_Fantas%C3%ADa_Nocturna_pfwnhg.png")
                 .build();
     }
 
     private Attraction demoDragonCoasterAttraction() {
         return Attraction.builder()
-                .name("Dragon Coaster")
-                .description("Montana rusa principal del parque.")
+                .name("Torre del Terror")
+                .description("Atracción intensa de altura con ambiente oscuro, vistas al parque y una caída diseñada para los visitantes más valientes.")
                 .size("LARGE")
                 .status("OPEN")
                 .totalSeats(32)
@@ -331,8 +331,8 @@ public class DemoDataConfig {
 
     private Attraction demoSplashRiverAttraction() {
         return Attraction.builder()
-                .name("Splash River")
-                .description("Recorrido acuatico familiar.")
+                .name("Río de Sangre")
+                .description("Recorrido acuático oscuro con barcas temáticas, niebla baja y luces rojas para una experiencia intensa pero controlada.")
                 .size("MEDIUM")
                 .status("OPEN")
                 .totalSeats(24)
@@ -344,8 +344,8 @@ public class DemoDataConfig {
 
     private Attraction demoFantasyCarouselAttraction() {
         return Attraction.builder()
-                .name("Fantasy Carousel")
-                .description("Atraccion infantil del area fantasy.")
+                .name("Laberinto de las Sombras")
+                .description("Recorrido inmersivo a pie entre pasillos oscuros, niebla baja y luces rojas diseñado para perder la orientación sin perder la seguridad.")
                 .size("SMALL")
                 .status("OPEN")
                 .totalSeats(18)
