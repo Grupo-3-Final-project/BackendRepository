@@ -5,9 +5,10 @@ import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.BookingSummaryResponse;
 import com.parque.booking.dto.CompanionRequest;
 import com.parque.booking.dto.TicketResponse;
-import com.parque.booking.service.notification.NotificationService;
 import com.parque.booking.model.Booking;
+import com.parque.booking.model.TicketStatus;
 import com.parque.booking.repository.BookingRepository;
+import com.parque.booking.service.notification.NotificationService;
 import com.parque.entity.Ticket;
 import com.parque.exception.ConflictException;
 import com.parque.exception.ResourceNotFoundException;
@@ -17,7 +18,6 @@ import com.parque.offer.model.Offer;
 import com.parque.offer.repository.OfferRepository;
 import com.parque.user.model.User;
 import com.parque.user.repository.UserRepository;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +28,7 @@ import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -35,7 +36,6 @@ public class BookingServiceImpl implements BookingService {
 
     private static final int ADULT_AGE = 18;
     private static final int SENIOR_AGE = 65;
-
 
     private final BookingRepository bookingRepository;
     private final UserRepository userRepository;
@@ -48,7 +48,8 @@ public class BookingServiceImpl implements BookingService {
             UserRepository userRepository,
             HotelRepository hotelRepository,
             OfferRepository offerRepository,
-            Optional<NotificationService> notificationService) {
+            Optional<NotificationService> notificationService
+    ) {
         this.bookingRepository = bookingRepository;
         this.userRepository = userRepository;
         this.hotelRepository = hotelRepository;
@@ -82,8 +83,8 @@ public class BookingServiceImpl implements BookingService {
                 .build();
 
         List<Ticket> tickets = companions.stream()
-            .map(companion -> toTicket(booking, companion, request.visitDate(), boardType))
-            .toList();
+                .map(companion -> toTicket(booking, companion, request.visitDate(), boardType))
+                .toList();
 
         booking.setTickets(tickets);
         booking.setTotalPrice(calculateTotalPrice(tickets, hotel, boardType));
@@ -93,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking saved = bookingRepository.saveAndFlush(booking);
-        saved.setEmailSent(sendBookingConfirmation(user, toResponse(saved)));
+        saved.setEmailSent(sendBookingConfirmation(user, saved));
         return toResponse(saved);
     }
 
@@ -157,12 +158,15 @@ public class BookingServiceImpl implements BookingService {
     private Ticket toTicket(Booking booking, CompanionRequest companion, LocalDate visitDate, String boardType) {
         String ageRange = resolveAgeRange(companion.birthDate(), visitDate);
         return Ticket.builder()
-            .booking(booking)
-            .holderFullName(companion.firstName() + " " + companion.lastName())
-            .ageRange(ageRange)
-            .price(resolveTicketPrice(ageRange, boardType))  // ← PASAMOS boardType
-            .build();
-    }   
+                .booking(booking)
+                .holderFullName(companion.firstName() + " " + companion.lastName())
+                .ageRange(ageRange)
+                .price(resolveTicketPrice(ageRange, boardType))
+                .entryToken(generateToken())
+                .mobileAccessToken(generateToken())
+                .status(TicketStatus.VALID)
+                .build();
+    }
 
     private String resolveAgeRange(LocalDate birthDate, LocalDate visitDate) {
         int age = ageAtVisit(birthDate, visitDate);
@@ -183,16 +187,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private BigDecimal resolveTicketPrice(String ageRange, String boardType) {
-    return switch (ageRange) {
-        case "CHILD" -> boardType.equals("HALF_BOARD")
-            ? new BigDecimal("20.00")
-            : new BigDecimal("30.00");
-        case "SENIOR" -> boardType.equals("HALF_BOARD")
-            ? new BigDecimal("40.00")
-            : new BigDecimal("55.00");
-        default -> boardType.equals("HALF_BOARD")
-            ? new BigDecimal("45.00")
-            : new BigDecimal("65.00");
+        return switch (ageRange) {
+            case "CHILD" -> boardType.equals("HALF_BOARD")
+                    ? new BigDecimal("20.00")
+                    : new BigDecimal("30.00");
+            case "SENIOR" -> boardType.equals("HALF_BOARD")
+                    ? new BigDecimal("40.00")
+                    : new BigDecimal("55.00");
+            default -> boardType.equals("HALF_BOARD")
+                    ? new BigDecimal("45.00")
+                    : new BigDecimal("65.00");
         };
     }
 
@@ -235,18 +239,19 @@ public class BookingServiceImpl implements BookingService {
                 booking.getVisitDate(),
                 booking.getTickets() == null ? 0 : booking.getTickets().size(),
                 booking.getTotalPrice(),
-                normalizeCreatedAt(booking.getCreatedAt()));
+                normalizeCreatedAt(booking.getCreatedAt())
+        );
     }
 
     private BookingResponse toResponse(Booking booking) {
         List<TicketResponse> tickets = booking.getTickets() == null
                 ? List.of()
                 : booking.getTickets().stream()
-                        .map(ticket -> new TicketResponse(
-                                ticket.getHolderFullName(),
-                                ticket.getAgeRange(),
-                                ticket.getPrice()))
-                        .toList();
+                .map(ticket -> new TicketResponse(
+                        ticket.getHolderFullName(),
+                        ticket.getAgeRange(),
+                        ticket.getPrice()))
+                .toList();
 
         return new BookingResponse(
                 booking.getId(),
@@ -259,7 +264,8 @@ public class BookingServiceImpl implements BookingService {
                 tickets,
                 booking.getTotalPrice(),
                 booking.getEmailSent(),
-                normalizeCreatedAt(booking.getCreatedAt()));
+                normalizeCreatedAt(booking.getCreatedAt())
+        );
     }
 
     private LocalDateTime normalizeCreatedAt(LocalDateTime createdAt) {
@@ -270,21 +276,22 @@ public class BookingServiceImpl implements BookingService {
         return firstName + " " + lastName;
     }
 
-    private boolean sendBookingConfirmation(User user, BookingResponse bookingResponse) {
+    private boolean sendBookingConfirmation(User user, Booking booking) {
         if (user == null || user.getEmail() == null || user.getEmail().isBlank()) {
             return false;
         }
 
         return notificationService
-                .map(service -> service.sendBookingConfirmation(List.of(user.getEmail()), bookingResponse))
+                .map(service -> service.sendBookingConfirmation(List.of(user.getEmail()), booking))
                 .orElse(false);
+    }
+
+    private String generateToken() {
+        return UUID.randomUUID().toString().replace("-", "");
     }
 
     public ArrayList<String> AddParticipantsToBok(ArrayList<String> emailsParticipants, Booking book) {
         book.getEmailsParticipants().addAll(emailsParticipants);
         return book.getEmailsParticipants();
     }
-
-
-
 }

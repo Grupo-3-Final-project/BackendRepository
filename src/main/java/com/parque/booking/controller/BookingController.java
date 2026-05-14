@@ -4,6 +4,7 @@ import com.parque.booking.dto.BookingCreateRequest;
 import com.parque.booking.dto.BookingResponse;
 import com.parque.booking.dto.BookingSummaryResponse;
 import com.parque.booking.service.booking.BookingService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -28,6 +29,7 @@ public class BookingController {
     }
 
     @PostMapping
+    @SecurityRequirements
     public ResponseEntity<BookingResponse> create(@Valid @RequestBody BookingCreateRequest request) {
         BookingResponse created = bookingService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);

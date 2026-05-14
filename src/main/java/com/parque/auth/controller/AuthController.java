@@ -3,7 +3,7 @@ package com.parque.auth.controller;
 import com.parque.auth.service.InternalAuthService;
 import com.parque.security.filter.dto.LoginRequest;
 import com.parque.security.filter.dto.LoginResponse;
-
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,6 +21,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
+    @SecurityRequirements
     public LoginResponse login(@Valid @RequestBody LoginRequest loginRequest) {
         return internalAuthService.login(loginRequest);
     }

@@ -829,7 +829,6 @@ Errores posibles:
 - `404 Not Found`: `Hotel not found`
 - `409 Conflict`: `Hotel is full`
 - `409 Conflict`: `A minor cannot travel without an adult`
-- `500 Internal Server Error`: `Email could not be sent`
 
 ### GET /api/bookings
 
@@ -887,6 +886,110 @@ Response `200 OK`:
 ```
 
 Requiere autenticacion interna con JWT.
+
+Notas funcionales del flujo de reserva:
+
+- El backend genera `N` tickets por reserva, uno por persona.
+- Cada ticket tiene un `QR de entrada` y un `QR de acceso movil`.
+- Los QR se envian por correo y no forman parte del response JSON de la reserva.
+- Si el correo no puede enviarse, la reserva sigue creandose y el endpoint devuelve `201 Created` con `emailSent: false`.
+
+## 8.1. Tickets y acceso movil
+
+Estos endpoints soportan el MVP visitante.
+
+El backend devuelve el ticket y el catalogo base de atracciones.
+
+El frontend movil es responsable de:
+
+- simular tiempos de espera aleatorios en cada actualizacion
+- ordenar por menor tiempo de espera
+- ocultar atracciones ya visitadas segun `localStorage`
+
+### GET /api/tickets/mobile/{mobileAccessToken}
+
+Abre la experiencia movil de un visitante a partir del QR de acceso movil del ticket.
+
+Response `200 OK`:
+
+```json
+{
+  "ticketId": 14,
+  "bookingId": 3,
+  "holderFullName": "Ana Garcia",
+  "ticketStatus": "VALID",
+  "visitDate": "2026-05-22",
+  "attractions": [
+    {
+      "id": 1,
+      "name": "Dragon Coaster",
+      "description": "Montana rusa principal del parque.",
+      "size": "LARGE",
+      "status": "OPEN",
+      "totalSeats": 32,
+      "availableSeats": 28,
+      "maintenanceFrequencyDays": 7,
+      "imageUrl": "https://example.com/attraction.jpg"
+    }
+  ]
+}
+```
+
+Errores posibles:
+
+- `404 Not Found`: `Ticket not found`
+- `409 Conflict`: `Ticket is not available`
+
+### POST /api/tickets/entry/{entryToken}/validate
+
+Valida el QR de entrada del ticket y marca ese ticket como usado.
+
+Response `200 OK`:
+
+```json
+{
+  "ticketId": 14,
+  "bookingId": 3,
+  "holderFullName": "Ana Garcia",
+  "ticketStatus": "USED",
+  "visitDate": "2026-05-22",
+  "usedAt": "2026-05-22T10:30:00"
+}
+```
+
+Errores posibles:
+
+- `404 Not Found`: `Ticket not found`
+- `409 Conflict`: `Ticket is not available`
+- `409 Conflict`: `Ticket already used`
+- `409 Conflict`: `Ticket is not valid for today`
+
+## 8.2. Tiempo de Granada
+
+Este endpoint da soporte al bloque meteorologico obligatorio del MVP movil.
+
+El parque es ficticio, pero el tiempo debe corresponder a Granada.
+
+### GET /api/weather/granada
+
+Devuelve el tiempo actual normalizado de Granada.
+
+Response `200 OK`:
+
+```json
+{
+  "city": "Granada",
+  "temperatureCelsius": 24.5,
+  "apparentTemperatureCelsius": 26.0,
+  "condition": "Poco nuboso",
+  "day": true,
+  "updatedAt": "2026-05-22T10:30:00"
+}
+```
+
+Errores posibles:
+
+- `500 Internal Server Error`: `Weather service unavailable`
 
 ## 9. Turnos de empleados
 
