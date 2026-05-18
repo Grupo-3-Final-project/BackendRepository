@@ -26,7 +26,11 @@ public class GranadaWeatherServiceImpl implements GranadaWeatherService {
     private Instant cachedAt;
 
     public GranadaWeatherServiceImpl() {
-        this.restClient = RestClient.create();
+        this(RestClient.create());
+    }
+
+    public GranadaWeatherServiceImpl(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     @Override

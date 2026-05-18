@@ -23,7 +23,11 @@ public class RestCloudinaryUploadClient implements CloudinaryUploadClient {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public RestCloudinaryUploadClient() {
-        this.restClient = RestClient.create();
+        this(RestClient.create());
+    }
+
+    public RestCloudinaryUploadClient(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     @Override
