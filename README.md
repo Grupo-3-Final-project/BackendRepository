@@ -1,14 +1,11 @@
 <div align="center">
 
-# 🚪 La Última Puerta
-
-**¿Te atreves a cruzarla?**
+# 🚪 La Última Puerta — Backend
 
 [![Java](https://img.shields.io/badge/Java-25-red?style=flat-square&logo=openjdk)](https://openjdk.org/)
-[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-red?style=flat-square&logo=springboot)](https://spring.io/projects/spring-boot)
-[![React](https://img.shields.io/badge/React-19-red?style=flat-square&logo=react)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-8-red?style=flat-square&logo=vite)](https://vitejs.dev/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-red?style=flat-square&logo=tailwindcss)](https://tailwindcss.com/)
+[![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-red?style=flat-square&logo=springboot)](https://spring.io/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.4-red?style=flat-square&logo=mysql)](https://www.mysql.com/)
+[![License](https://img.shields.io/badge/license-MIT-red?style=flat-square)](LICENSE)
 
 </div>
 
@@ -16,7 +13,7 @@
 
 <div align="center">
 
-[🇪🇸 Leer en Español](#es) &nbsp;·&nbsp; [🇬🇧 Read in English](#en)
+[🇪🇸 Español](#es) &nbsp;·&nbsp; [🇬🇧 English](#en)
 
 </div>
 
@@ -24,271 +21,298 @@
 
 <a id="es"></a>
 
-<div align="right"><a href="#en">🇬🇧 English version ↓</a></div>
+<div align="right"><a href="#en">🇬🇧 English ↓</a></div>
 
-## 🇪🇸 La Última Puerta
+## 🇪🇸 Español
 
-Aplicación web de gestión y venta para un parque de atracciones de terror.
-Construida como proyecto final del bootcamp de **Factoría F5 · 2026**.
+API REST para la gestión integral de un parque de atracciones de terror.
+Proyecto final del bootcamp **Factoría F5 · 2026**.
 
-El sistema ofrece tres experiencias separadas e independientes:
-
-- **Home pública** — escaparate comercial orientado a venta y presentación del parque.
-- **Dashboard interno** — panel operativo para taquilla y administración.
-- **Mobile visitante** — guía interactiva accesible mediante QR desde el parque.
+Proporciona la lógica de negocio, la seguridad y los datos
+que alimentan la Home pública, el Dashboard interno,
+la experiencia Mobile del visitante y el Control QR de acceso.
 
 ---
 
-### Índice
+### ⚙️ Stack
 
-- [Stack tecnológico](#stack-es)
-- [Estructura del proyecto](#estructura-es)
-- [Instalación](#instalacion-es)
-- [Variables de entorno](#variables-es)
-- [Comandos principales](#comandos-es)
-- [Testing](#testing-es)
-- [API y Swagger](#api-es)
-- [Equipo](#equipo-es)
-
----
-
-<a id="stack-es"></a>
-### Stack tecnológico
-
-#### Backend
+![Java](https://img.shields.io/badge/Java-25-red?style=flat-square&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-red?style=flat-square&logo=springboot)
+![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-red?style=flat-square&logo=springsecurity)
+![MySQL](https://img.shields.io/badge/MySQL-8.4-red?style=flat-square&logo=mysql)
+![Flyway](https://img.shields.io/badge/Flyway-migraciones-red?style=flat-square&logo=flyway)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-imágenes-red?style=flat-square&logo=cloudinary)
+![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-red?style=flat-square&logo=swagger)
+![Maven](https://img.shields.io/badge/Maven-build-red?style=flat-square&logo=apachemaven)
 
 | Elemento | Tecnología |
 |----------|-----------|
 | Lenguaje | Java 25 |
 | Framework | Spring Boot 4.0.6 |
-| Build | Maven |
-| Base de datos | MySQL (producción) / H2 (desarrollo) |
+| Seguridad | Spring Security + JWT (jjwt 0.12.3) |
+| Persistencia | Spring Data JPA · Hibernate |
+| Base de datos | MySQL 8.4 (dev/prod) · H2 (test) |
+| Migraciones | Flyway |
 | Imágenes | Cloudinary |
+| QR | ZXing 3.5.3 |
+| Email | Spring Mail |
 | Documentación API | Swagger / OpenAPI (springdoc 3.0.2) |
-
-#### Frontend
-
-| Elemento | Tecnología |
-|----------|-----------|
-| Framework | React 19 + Vite 8 |
-| Lenguaje | JavaScript / JSX |
-| Estilos | Tailwind CSS 4 |
-| HTTP client | Axios |
-| Routing | React Router DOM 7 |
-| Iconos | Lucide React / React Icons |
-| Gestor de paquetes | npm |
-| Testing unitario | Vitest + React Testing Library |
-| Testing E2E | Playwright |
+| Build | Maven |
+| Utilidades | Lombok |
 
 ---
 
-<a id="estructura-es"></a>
-### Estructura del proyecto
+### 🗂️ Estructura del proyecto
 
-El sistema se divide en dos repositorios independientes.
+![Arquitectura](https://img.shields.io/badge/arquitectura-domain--driven-red?style=flat-square)
+![Dominios](https://img.shields.io/badge/dominios-13-red?style=flat-square)
+![Perfiles](https://img.shields.io/badge/perfiles-dev_·_test_·_e2e_·_prod-red?style=flat-square)
 
-#### Backend
-
-```
-backend-repository/
-├── docs/
-│   ├── API_CONTRACT.md
-│   └── CONTRACT_TESTING.md
-└── src/
-    └── main/java/com/parque/
-        ├── attraction/
-        ├── booking/
-        ├── dashboard/
-        ├── employee/
-        ├── hotel/
-        ├── maintenance/
-        ├── shift/
-        └── user/
-```
-
-#### Frontend
+El código se organiza por dominios de negocio:
 
 ```
-frontend-project/
-├── docs/
-│   ├── API_CONTRACT.md
-│   ├── CONTRACT_TESTING.md
-│   └── FRONTEND_CONTEXT.md
-└── src/
-    ├── api/            ← llamadas HTTP centralizadas
-    ├── assets/
-    ├── components/
-    │   ├── dashboard/
-    │   ├── mobileExperience/
-    │   └── ui/
-    ├── features/       ← lógica por dominio
-    │   ├── users/
-    │   ├── hotels/
-    │   ├── attractions/
-    │   ├── employees/
-    │   ├── bookings/
-    │   └── dashboard/
-    ├── hooks/
-    ├── layouts/
-    ├── pages/          ← HomePage · DashboardPage · MobilePage
-    └── router/
+src/main/java/com/parque/
+├── attraction/       ← atracciones del parque
+├── auth/             ← autenticación interna (JWT)
+├── booking/          ← reservas, notificaciones y QR
+│   └── service/
+│       ├── booking/
+│       ├── notification/   ← email + QR
+│       └── ticket/         ← acceso mobile y validación
+├── cloudinary/       ← gestión de imágenes
+├── config/           ← seguridad, CORS, demo data, Flyway
+├── dashboard/        ← métricas y KPIs
+├── employee/         ← empleados y tipos
+├── hotel/            ← hoteles y disponibilidad
+├── maintenance/      ← agenda y técnicos
+├── offer/            ← ofertas del parque
+├── security/         ← filtros JWT
+├── shift/            ← turnos
+├── user/             ← usuarios y clientes
+└── weather/          ← clima real de Granada
+```
+
+```
+src/main/resources/
+├── application.properties          ← configuración base
+├── application-dev.properties      ← desarrollo local
+├── application-test.properties     ← tests unitarios
+├── application-e2e.properties      ← tests E2E
+├── application-prod.properties     ← producción
+└── db/migration/mysql/             ← migraciones Flyway (V1–V10)
 ```
 
 ---
 
-<a id="instalacion-es"></a>
-### Instalación
+### 📋 Requisitos previos
 
-#### Backend
+![Java](https://img.shields.io/badge/Java-25_requerido-red?style=flat-square&logo=openjdk)
+![Maven](https://img.shields.io/badge/Maven-requerido-red?style=flat-square&logo=apachemaven)
+![MySQL](https://img.shields.io/badge/MySQL-8.4_o_Docker-red?style=flat-square&logo=mysql)
 
-**Requisitos previos:** Java 25, Maven.
+- Java 25
+- Maven
+- MySQL 8.4 **o** Docker y Docker Compose
+
+---
+
+### 🚀 Instalación
+
+![Docker](https://img.shields.io/badge/Docker-recomendado-red?style=flat-square&logo=docker)
+![Flyway](https://img.shields.io/badge/Flyway-migraciones_automáticas-red?style=flat-square&logo=flyway)
+![Demo data](https://img.shields.io/badge/demo_data-carga_automática-red?style=flat-square)
+
+#### Opción A — Con Docker (recomendada)
+
+Docker levanta la base de datos automáticamente:
 
 ```bash
 # 1. Clonar el repositorio
 git clone <url-repositorio-backend>
-cd backend-repository
+cd BackendRepository
 
-# 2. Configurar las variables de entorno (ver sección Variables de entorno)
+# 2. Crear el archivo de entorno
 cp .env.example .env
+# Editar .env con los valores reales
 
-# 3. Arrancar la aplicación
+# 3. Levantar MySQL con Docker
+docker-compose up -d
+
+# 4. Arrancar la aplicación
 ./mvnw spring-boot:run
 ```
 
 En Windows:
-
 ```bash
 ./mvnw.cmd spring-boot:run
 ```
 
-#### Frontend
+#### Opción B — Sin Docker
 
-**Requisitos previos:** Node.js, npm.
+Crear la base de datos en MySQL local antes de arrancar:
 
-```bash
-# 1. Clonar el repositorio
-git clone <url-repositorio-frontend>
-cd frontend-project
-
-# 2. Instalar dependencias
-npm install
-
-# 3. Configurar las variables de entorno (ver sección Variables de entorno)
-cp .env.example .env
-
-# 4. Arrancar en modo desarrollo
-npm run dev
+```sql
+CREATE DATABASE parque_atracciones;
+CREATE USER 'parque_user'@'localhost' IDENTIFIED BY 'parque_password';
+GRANT ALL PRIVILEGES ON parque_atracciones.* TO 'parque_user'@'localhost';
 ```
+
+Después:
+```bash
+./mvnw spring-boot:run
+```
+
+Flyway aplicará las migraciones automáticamente al arrancar.
+
+> Los datos de demostración se cargan solos en el perfil `dev`.
+> Credenciales del administrador demo: `admin` / `admin12345`
 
 ---
 
-<a id="variables-es"></a>
-### Variables de entorno
+### 🔐 Variables de entorno
 
-#### Backend — `.env`
+![dotenv](https://img.shields.io/badge/.env-requerido-red?style=flat-square&logo=dotenv)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-imágenes-red?style=flat-square&logo=cloudinary)
+![SMTP](https://img.shields.io/badge/SMTP-email-red?style=flat-square&logo=gmail)
+![JWT](https://img.shields.io/badge/JWT-autenticación-red?style=flat-square&logo=jsonwebtokens)
+
+Crear un archivo `.env` en la raíz del proyecto a partir de `.env.example`:
 
 ```env
-DB_URL=jdbc:mysql://localhost:3306/nombre_base_datos
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_contraseña
+# Base de datos
+DB_URL=jdbc:mysql://localhost:3306/parque_atracciones?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+DB_USERNAME=parque_user
+DB_PASSWORD=parque_password
+
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=tu_cloud_name
 CLOUDINARY_API_KEY=tu_api_key
 CLOUDINARY_API_SECRET=tu_api_secret
+
+# Email
+MAIL_HOST=smtp.tuproveedor.com
+MAIL_PORT=587
 MAIL_USERNAME=tu_email
 MAIL_PASSWORD=tu_contraseña_email
+
+# URLs del frontend (para generar los QR)
+APP_MOBILE_BASE_URL=http://localhost:5173/mobile
+APP_ENTRY_BASE_URL=http://localhost:5173/entry
+
+# Demo data (dev)
+APP_DEMO_DATA_ENABLED=true
+APP_DEMO_ADMIN_USERNAME=admin
+APP_DEMO_ADMIN_EMAIL=admin@parque.local
+APP_DEMO_ADMIN_PASSWORD=admin12345
 ```
 
-#### Frontend — `.env`
-
-```env
-VITE_API_BASE_URL=http://localhost:8080/api
-```
-
-> ⚠️ El archivo `.env` no se sube al repositorio. Usar siempre `.env.example` como plantilla.
+> ⚠️ El archivo `.env` no se sube al repositorio. Nunca incluyas secretos en el código.
 
 ---
 
-<a id="comandos-es"></a>
-### Comandos principales
+### 💻 Comandos
 
-#### Backend
-
-```bash
-./mvnw spring-boot:run     # arrancar la aplicación
-./mvnw clean test          # ejecutar los tests
-./mvnw clean install       # compilar y empaquetar
-```
-
-#### Frontend
+![Maven](https://img.shields.io/badge/Maven-comandos-red?style=flat-square&logo=apachemaven)
+![Docker](https://img.shields.io/badge/Docker_Compose-MySQL-red?style=flat-square&logo=docker)
 
 ```bash
-npm run dev        # servidor de desarrollo en http://localhost:5173
-npm run build      # compilar para producción
-npm run preview    # previsualizar la build de producción
-npm run lint       # análisis estático del código
-npm run test       # ejecutar tests unitarios
-npx playwright test  # ejecutar tests E2E
+./mvnw spring-boot:run          # arrancar en perfil dev
+./mvnw clean test               # ejecutar tests unitarios
+./mvnw verify                   # ejecutar todos los tests (unitarios + integración)
+./mvnw clean install            # compilar y empaquetar
+docker-compose up -d            # levantar MySQL con Docker
+docker-compose down             # detener MySQL
 ```
 
 ---
 
-<a id="testing-es"></a>
-### Testing
+### 🔌 Rutas de la API
 
-#### Backend
+![REST](https://img.shields.io/badge/REST-API-red?style=flat-square)
+![JSON](https://img.shields.io/badge/JSON-application%2Fjson-red?style=flat-square)
+![Swagger](https://img.shields.io/badge/Swagger-UI_disponible-red?style=flat-square&logo=swagger)
+![Módulos](https://img.shields.io/badge/módulos-13-red?style=flat-square)
 
-- **Tests unitarios:** servicios, reglas de negocio y validaciones.
-- **Tests de integración:** controladores, repositorios y flujos de reserva.
-- **Tests de contrato:** validación del contrato API entre frontend y backend.
-
-Se aplica TDD en reglas de negocio críticas.
-
-```bash
-./mvnw clean test
-```
-
-#### Frontend
-
-- **Tests unitarios:** componentes, servicios API y manejo de errores.
-- **Tests E2E (Playwright):**
-  - Cargar la home.
-  - Ver hoteles disponibles.
-  - Crear una reserva.
-  - Ver el dashboard.
-  - Validar errores de negocio desde backend.
-
-```bash
-npm run test
-npx playwright test
-```
-
-Una tarea no se considera terminada hasta que los tests relevantes pasan.
-Consultar `docs/CONTRACT_TESTING.md` para los casos de contrato mínimos.
-
----
-
-<a id="api-es"></a>
-### API y Swagger
-
-El backend expone documentación interactiva Swagger/OpenAPI en:
+La API está disponible en `http://localhost:8080`.
+La documentación interactiva Swagger en:
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui.html
 ```
 
-Contrato API completo en JSON:
+Contrato en JSON:
 
 ```
 http://localhost:8080/v3/api-docs
 ```
 
+**Módulos disponibles:**
+
+| Módulo | Prefijo |
+|--------|---------|
+| Autenticación | `/api/auth` |
+| Usuarios | `/api/users` |
+| Atracciones | `/api/attractions` |
+| Hoteles | `/api/hotels` |
+| Ofertas | `/api/offers` |
+| Reservas | `/api/bookings` |
+| Empleados | `/api/employees` |
+| Turnos | `/api/shifts` |
+| Mantenimiento | `/api/maintenance` |
+| Dashboard | `/api/dashboard` |
+| Imágenes | `/api/images` |
+| Tickets / QR mobile | `/api/tickets` |
+| Clima | `/api/weather/granada` |
+
 La fuente de verdad del contrato es siempre `docs/API_CONTRACT.md`.
-No se modifican endpoints, campos JSON ni estructuras de request/response sin actualizar ese documento y comunicarlo al equipo.
 
 ---
 
-<a id="equipo-es"></a>
-### Equipo
+### 🧪 Testing
+
+![Tests](https://img.shields.io/badge/tests-31_archivos-red?style=flat-square&logo=junit5)
+![Unitarios](https://img.shields.io/badge/tipo-unitarios-red?style=flat-square)
+![Integración](https://img.shields.io/badge/tipo-integración-red?style=flat-square)
+![Contrato](https://img.shields.io/badge/tipo-contrato-red?style=flat-square)
+![E2E](https://img.shields.io/badge/tipo-E2E-red?style=flat-square)
+![H2](https://img.shields.io/badge/BD_test-H2_en_memoria-red?style=flat-square)
+
+El proyecto tiene 31 archivos de test que cubren:
+
+| Tipo | Qué cubre |
+|------|----------|
+| Unitarios | Servicios y reglas de negocio |
+| Integración | Controladores y repositorios |
+| Contrato | Validación del contrato API con frontend |
+| E2E | Flujos completos de reserva |
+| Migración | Integridad del esquema de base de datos |
+
+```bash
+./mvnw clean test        # tests unitarios (perfil test, H2)
+./mvnw verify            # todos los tests incluidos los de integración
+```
+
+---
+
+### 📚 Documentación técnica
+
+![Markdown](https://img.shields.io/badge/formato-Markdown-red?style=flat-square&logo=markdown)
+![API Contract](https://img.shields.io/badge/contrato_API-fuente_de_verdad-red?style=flat-square)
+![Swagger](https://img.shields.io/badge/Swagger-sincronizado-red?style=flat-square&logo=swagger)
+
+| Archivo | Contenido |
+|---------|----------|
+| `docs/API_CONTRACT.md` | Fuente de verdad del contrato API |
+| `docs/CONTRACT_TESTING.md` | Estrategia y casos mínimos de testing |
+| `docs/API_INTEGRATION_GUIDE.md` | Guía de integración con el frontend |
+| `docs/DEMO_CHECKLIST.md` | Lista de verificación para la demo |
+
+---
+
+### 👥 Equipo
+
+![Factoría F5](https://img.shields.io/badge/Factoría_F5-2026-red?style=flat-square)
+![Scrum](https://img.shields.io/badge/metodología-Scrum-red?style=flat-square)
 
 Proyecto desarrollado por el equipo de **Factoría F5 · 2026**.
 
@@ -296,285 +320,311 @@ Proyecto desarrollado por el equipo de **Factoría F5 · 2026**.
 |-----|---------|
 | Product Owner | Alberto |
 | Scrum Master | Xavier |
-| Desarrollador / Líbero de soporte | David |
-| Desarrolladora | Alba |
-| Desarrollador | JuanLu |
+| Desarrolladora | — |
+| Desarrolladora | — |
+| Desarrolladora / Líbero | David |
 
 ---
 
-<div align="right"><a href="#en">🇬🇧 English version ↓</a></div>
-<div align="center"><a href="#es">⬆ Volver al inicio</a></div>
+<div align="center"><a href="#es">⬆ Volver al inicio</a> · <a href="#en">🇬🇧 English ↓</a></div>
 
 ---
 ---
 
 <a id="en"></a>
 
-<div align="right"><a href="#es">🇪🇸 Versión en Español ↑</a></div>
+<div align="right"><a href="#es">🇪🇸 Español ↑</a></div>
 
-## 🇬🇧 La Última Puerta
+## 🇬🇧 English
 
-Web application for management and ticket sales for a horror theme park.
-Built as the final project of the **Factoría F5 · 2026** bootcamp.
+REST API for the full management of a horror theme park.
+Final project of the **Factoría F5 · 2026** bootcamp.
 
-The system provides three separate and independent experiences:
-
-- **Public home** — commercial showcase oriented to sales and park presentation.
-- **Internal dashboard** — operational panel for ticket office and administration.
-- **Visitor mobile** — interactive guide accessible via QR from inside the park.
+Provides the business logic, security and data that power
+the public Home, the internal Dashboard,
+the visitor Mobile experience and the QR entry validation.
 
 ---
 
-### Table of Contents
+### ⚙️ Stack
 
-- [Tech Stack](#stack-en)
-- [Project Structure](#structure-en)
-- [Installation](#installation-en)
-- [Environment Variables](#variables-en)
-- [Main Commands](#commands-en)
-- [Testing](#testing-en)
-- [API and Swagger](#api-en)
-- [Team](#team-en)
-
----
-
-<a id="stack-en"></a>
-### Tech Stack
-
-#### Backend
+![Java](https://img.shields.io/badge/Java-25-red?style=flat-square&logo=openjdk)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot-4.0.6-red?style=flat-square&logo=springboot)
+![Spring Security](https://img.shields.io/badge/Spring_Security-JWT-red?style=flat-square&logo=springsecurity)
+![MySQL](https://img.shields.io/badge/MySQL-8.4-red?style=flat-square&logo=mysql)
+![Flyway](https://img.shields.io/badge/Flyway-migrations-red?style=flat-square&logo=flyway)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-images-red?style=flat-square&logo=cloudinary)
+![Swagger](https://img.shields.io/badge/Swagger-OpenAPI-red?style=flat-square&logo=swagger)
+![Maven](https://img.shields.io/badge/Maven-build-red?style=flat-square&logo=apachemaven)
 
 | Element | Technology |
 |---------|-----------|
 | Language | Java 25 |
 | Framework | Spring Boot 4.0.6 |
-| Build | Maven |
-| Database | MySQL (production) / H2 (development) |
+| Security | Spring Security + JWT (jjwt 0.12.3) |
+| Persistence | Spring Data JPA · Hibernate |
+| Database | MySQL 8.4 (dev/prod) · H2 (test) |
+| Migrations | Flyway |
 | Images | Cloudinary |
-| API Documentation | Swagger / OpenAPI (springdoc 3.0.2) |
-
-#### Frontend
-
-| Element | Technology |
-|---------|-----------|
-| Framework | React 19 + Vite 8 |
-| Language | JavaScript / JSX |
-| Styles | Tailwind CSS 4 |
-| HTTP client | Axios |
-| Routing | React Router DOM 7 |
-| Icons | Lucide React / React Icons |
-| Package manager | npm |
-| Unit testing | Vitest + React Testing Library |
-| E2E testing | Playwright |
+| QR generation | ZXing 3.5.3 |
+| Email | Spring Mail |
+| API documentation | Swagger / OpenAPI (springdoc 3.0.2) |
+| Build | Maven |
+| Utilities | Lombok |
 
 ---
 
-<a id="structure-en"></a>
-### Project Structure
+### 🗂️ Project Structure
 
-The system is split into two independent repositories.
+![Architecture](https://img.shields.io/badge/architecture-domain--driven-red?style=flat-square)
+![Domains](https://img.shields.io/badge/domains-13-red?style=flat-square)
+![Profiles](https://img.shields.io/badge/profiles-dev_·_test_·_e2e_·_prod-red?style=flat-square)
 
-#### Backend
-
-```
-backend-repository/
-├── docs/
-│   ├── API_CONTRACT.md
-│   └── CONTRACT_TESTING.md
-└── src/
-    └── main/java/com/parque/
-        ├── attraction/
-        ├── booking/
-        ├── dashboard/
-        ├── employee/
-        ├── hotel/
-        ├── maintenance/
-        ├── shift/
-        └── user/
-```
-
-#### Frontend
+Code is organised by business domain:
 
 ```
-frontend-project/
-├── docs/
-│   ├── API_CONTRACT.md
-│   ├── CONTRACT_TESTING.md
-│   └── FRONTEND_CONTEXT.md
-└── src/
-    ├── api/            ← centralised HTTP calls
-    ├── assets/
-    ├── components/
-    │   ├── dashboard/
-    │   ├── mobileExperience/
-    │   └── ui/
-    ├── features/       ← domain logic
-    │   ├── users/
-    │   ├── hotels/
-    │   ├── attractions/
-    │   ├── employees/
-    │   ├── bookings/
-    │   └── dashboard/
-    ├── hooks/
-    ├── layouts/
-    ├── pages/          ← HomePage · DashboardPage · MobilePage
-    └── router/
+src/main/java/com/parque/
+├── attraction/       ← park attractions
+├── auth/             ← internal authentication (JWT)
+├── booking/          ← bookings, notifications and QR
+│   └── service/
+│       ├── booking/
+│       ├── notification/   ← email + QR
+│       └── ticket/         ← mobile access and entry validation
+├── cloudinary/       ← image management
+├── config/           ← security, CORS, demo data, Flyway
+├── dashboard/        ← metrics and KPIs
+├── employee/         ← employees and types
+├── hotel/            ← hotels and availability
+├── maintenance/      ← schedule and technicians
+├── offer/            ← park offers
+├── security/         ← JWT filters
+├── shift/            ← shifts
+├── user/             ← users and customers
+└── weather/          ← live Granada weather
+```
+
+```
+src/main/resources/
+├── application.properties          ← base configuration
+├── application-dev.properties      ← local development
+├── application-test.properties     ← unit tests
+├── application-e2e.properties      ← E2E tests
+├── application-prod.properties     ← production
+└── db/migration/mysql/             ← Flyway migrations (V1–V10)
 ```
 
 ---
 
-<a id="installation-en"></a>
-### Installation
+### 📋 Prerequisites
 
-#### Backend
+![Java](https://img.shields.io/badge/Java-25_required-red?style=flat-square&logo=openjdk)
+![Maven](https://img.shields.io/badge/Maven-required-red?style=flat-square&logo=apachemaven)
+![MySQL](https://img.shields.io/badge/MySQL-8.4_or_Docker-red?style=flat-square&logo=mysql)
 
-**Prerequisites:** Java 25, Maven.
+- Java 25
+- Maven
+- MySQL 8.4 **or** Docker and Docker Compose
+
+---
+
+### 🚀 Installation
+
+![Docker](https://img.shields.io/badge/Docker-recommended-red?style=flat-square&logo=docker)
+![Flyway](https://img.shields.io/badge/Flyway-auto_migration-red?style=flat-square&logo=flyway)
+![Demo data](https://img.shields.io/badge/demo_data-auto_load-red?style=flat-square)
+
+#### Option A — With Docker (recommended)
+
+Docker starts the database automatically:
 
 ```bash
 # 1. Clone the repository
 git clone <backend-repository-url>
-cd backend-repository
+cd BackendRepository
 
-# 2. Set up environment variables (see Environment Variables section)
+# 2. Create the environment file
 cp .env.example .env
+# Edit .env with real values
 
-# 3. Start the application
+# 3. Start MySQL with Docker
+docker-compose up -d
+
+# 4. Start the application
 ./mvnw spring-boot:run
 ```
 
 On Windows:
-
 ```bash
 ./mvnw.cmd spring-boot:run
 ```
 
-#### Frontend
+#### Option B — Without Docker
 
-**Prerequisites:** Node.js, npm.
+Create the database in your local MySQL before starting:
 
-```bash
-# 1. Clone the repository
-git clone <frontend-repository-url>
-cd frontend-project
-
-# 2. Install dependencies
-npm install
-
-# 3. Set up environment variables (see Environment Variables section)
-cp .env.example .env
-
-# 4. Start in development mode
-npm run dev
+```sql
+CREATE DATABASE parque_atracciones;
+CREATE USER 'parque_user'@'localhost' IDENTIFIED BY 'parque_password';
+GRANT ALL PRIVILEGES ON parque_atracciones.* TO 'parque_user'@'localhost';
 ```
+
+Then:
+```bash
+./mvnw spring-boot:run
+```
+
+Flyway will apply all migrations automatically on startup.
+
+> Demo data loads automatically in the `dev` profile.
+> Demo admin credentials: `admin` / `admin12345`
 
 ---
 
-<a id="variables-en"></a>
-### Environment Variables
+### 🔐 Environment Variables
 
-#### Backend — `.env`
+![dotenv](https://img.shields.io/badge/.env-required-red?style=flat-square&logo=dotenv)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-images-red?style=flat-square&logo=cloudinary)
+![SMTP](https://img.shields.io/badge/SMTP-email-red?style=flat-square&logo=gmail)
+![JWT](https://img.shields.io/badge/JWT-authentication-red?style=flat-square&logo=jsonwebtokens)
+
+Create a `.env` file in the project root from `.env.example`:
 
 ```env
-DB_URL=jdbc:mysql://localhost:3306/your_database_name
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+# Database
+DB_URL=jdbc:mysql://localhost:3306/parque_atracciones?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Europe/Madrid
+DB_USERNAME=parque_user
+DB_PASSWORD=parque_password
+
+# Cloudinary
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
+
+# Email
+MAIL_HOST=smtp.yourprovider.com
+MAIL_PORT=587
 MAIL_USERNAME=your_email
 MAIL_PASSWORD=your_email_password
+
+# Frontend URLs (used to generate QR codes)
+APP_MOBILE_BASE_URL=http://localhost:5173/mobile
+APP_ENTRY_BASE_URL=http://localhost:5173/entry
+
+# Demo data (dev)
+APP_DEMO_DATA_ENABLED=true
+APP_DEMO_ADMIN_USERNAME=admin
+APP_DEMO_ADMIN_EMAIL=admin@parque.local
+APP_DEMO_ADMIN_PASSWORD=admin12345
 ```
 
-#### Frontend — `.env`
-
-```env
-VITE_API_BASE_URL=http://localhost:8080/api
-```
-
-> ⚠️ The `.env` file must never be committed to the repository. Always use `.env.example` as a template.
+> ⚠️ The `.env` file must never be committed. Never hardcode secrets in the codebase.
 
 ---
 
-<a id="commands-en"></a>
-### Main Commands
+### 💻 Commands
 
-#### Backend
-
-```bash
-./mvnw spring-boot:run     # start the application
-./mvnw clean test          # run the test suite
-./mvnw clean install       # compile and package
-```
-
-#### Frontend
+![Maven](https://img.shields.io/badge/Maven-commands-red?style=flat-square&logo=apachemaven)
+![Docker](https://img.shields.io/badge/Docker_Compose-MySQL-red?style=flat-square&logo=docker)
 
 ```bash
-npm run dev        # development server at http://localhost:5173
-npm run build      # production build
-npm run preview    # preview the production build
-npm run lint       # static code analysis
-npm run test       # run unit tests
-npx playwright test  # run E2E tests
+./mvnw spring-boot:run          # start in dev profile
+./mvnw clean test               # run unit tests
+./mvnw verify                   # run all tests (unit + integration)
+./mvnw clean install            # compile and package
+docker-compose up -d            # start MySQL with Docker
+docker-compose down             # stop MySQL
 ```
 
 ---
 
-<a id="testing-en"></a>
-### Testing
+### 🔌 API Endpoints
 
-#### Backend
+![REST](https://img.shields.io/badge/REST-API-red?style=flat-square)
+![JSON](https://img.shields.io/badge/JSON-application%2Fjson-red?style=flat-square)
+![Swagger](https://img.shields.io/badge/Swagger-UI_available-red?style=flat-square&logo=swagger)
+![Modules](https://img.shields.io/badge/modules-13-red?style=flat-square)
 
-- **Unit tests:** services, business rules and validations.
-- **Integration tests:** controllers, repositories and booking flows.
-- **Contract tests:** API contract validation between frontend and backend.
-
-TDD is applied for critical business rules.
-
-```bash
-./mvnw clean test
-```
-
-#### Backend
-
-- **Unit tests:** components, API services and error handling.
-- **E2E tests (Playwright):**
-  - Load the home page.
-  - View available hotels.
-  - Create a booking.
-  - View the dashboard.
-  - Validate business rule errors returned from the backend.
-
-```bash
-npm run test
-npx playwright test
-```
-
-A task is not considered done until all relevant tests pass.
-See `docs/CONTRACT_TESTING.md` for the minimum contract test cases.
-
----
-
-<a id="api-en"></a>
-### API and Swagger
-
-The backend exposes interactive Swagger/OpenAPI documentation at:
+The API is available at `http://localhost:8080`.
+Interactive Swagger documentation at:
 
 ```
-http://localhost:8080/swagger-ui/index.html
+http://localhost:8080/swagger-ui.html
 ```
 
-Full API contract in JSON:
+Contract in JSON:
 
 ```
 http://localhost:8080/v3/api-docs
 ```
 
+**Available modules:**
+
+| Module | Prefix |
+|--------|--------|
+| Authentication | `/api/auth` |
+| Users | `/api/users` |
+| Attractions | `/api/attractions` |
+| Hotels | `/api/hotels` |
+| Offers | `/api/offers` |
+| Bookings | `/api/bookings` |
+| Employees | `/api/employees` |
+| Shifts | `/api/shifts` |
+| Maintenance | `/api/maintenance` |
+| Dashboard | `/api/dashboard` |
+| Images | `/api/images` |
+| Tickets / QR mobile | `/api/tickets` |
+| Weather | `/api/weather/granada` |
+
 The source of truth for the contract is always `docs/API_CONTRACT.md`.
-Endpoints, JSON field names and request/response structures must not be changed without updating that document and communicating the change to the team.
 
 ---
 
-<a id="team-en"></a>
-### Team
+### 🧪 Testing
+
+![Tests](https://img.shields.io/badge/tests-31_files-red?style=flat-square&logo=junit5)
+![Unit](https://img.shields.io/badge/type-unit-red?style=flat-square)
+![Integration](https://img.shields.io/badge/type-integration-red?style=flat-square)
+![Contract](https://img.shields.io/badge/type-contract-red?style=flat-square)
+![E2E](https://img.shields.io/badge/type-E2E-red?style=flat-square)
+![H2](https://img.shields.io/badge/test_DB-H2_in_memory-red?style=flat-square)
+
+The project has 31 test files covering:
+
+| Type | Scope |
+|------|-------|
+| Unit | Services and business rules |
+| Integration | Controllers and repositories |
+| Contract | API contract validation with frontend |
+| E2E | Full booking flows |
+| Migration | Database schema integrity |
+
+```bash
+./mvnw clean test        # unit tests (test profile, H2)
+./mvnw verify            # all tests including integration
+```
+
+---
+
+### 📚 Technical Documentation
+
+![Markdown](https://img.shields.io/badge/format-Markdown-red?style=flat-square&logo=markdown)
+![API Contract](https://img.shields.io/badge/API_contract-source_of_truth-red?style=flat-square)
+![Swagger](https://img.shields.io/badge/Swagger-synced-red?style=flat-square&logo=swagger)
+
+| File | Content |
+|------|---------|
+| `docs/API_CONTRACT.md` | API contract source of truth |
+| `docs/CONTRACT_TESTING.md` | Testing strategy and minimum cases |
+| `docs/API_INTEGRATION_GUIDE.md` | Integration guide for the frontend |
+| `docs/DEMO_CHECKLIST.md` | Demo verification checklist |
+
+---
+
+### 👥 Team
+
+![Factoría F5](https://img.shields.io/badge/Factoría_F5-2026-red?style=flat-square)
+![Scrum](https://img.shields.io/badge/methodology-Scrum-red?style=flat-square)
 
 Project developed by the **Factoría F5 · 2026** team.
 
@@ -582,14 +632,13 @@ Project developed by the **Factoría F5 · 2026** team.
 |------|--------|
 | Product Owner | Alberto |
 | Scrum Master | Xavier |
+| Developer | — |
+| Developer | — |
 | Developer / Support Libero | David |
-| Developer | Alba |
-| Developer | JuanLu |
 
 ---
 
-<div align="right"><a href="#es">🇪🇸 Versión en Español ↑</a></div>
-<div align="center"><a href="#en">⬆ Back to top</a></div>
+<div align="center"><a href="#en">⬆ Back to top</a> · <a href="#es">🇪🇸 Español ↑</a></div>
 
 ---
 
