@@ -25,6 +25,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -80,6 +81,35 @@ class ShiftControllerIT {
         JsonNode body = objectMapper.readTree(created.getBody());
         assertThat(body.get("message").asText()).isEqualTo("Shifts generated successfully");
         assertThat(body.get("totalGeneratedShifts").asInt()).isGreaterThan(0);
+    }
+
+    @Test
+    void getShifts_shouldReturn200AndGeneratedShifts() throws Exception {
+        for (int i = 0; i < 3; i++) {
+            employeeService.create(new EmployeeCreateRequest("Cleaner" + i, "X", "1000000" + i + "A", "c" + i + "@e.com", "CLEANER", "MORNING", true));
+            employeeService.create(new EmployeeCreateRequest("Animator" + i, "X", "2000000" + i + "A", "a" + i + "@e.com", "ANIMATOR", "MORNING", true));
+            employeeService.create(new EmployeeCreateRequest("Tech" + i, "X", "3000000" + i + "A", "t" + i + "@e.com", "TECHNICIAN", "MORNING", true));
+        }
+
+        postJson(
+                "/api/shifts/generate",
+                objectMapper.writeValueAsString(new ShiftGenerateRequest(LocalDate.parse("2026-05-01"), LocalDate.parse("2026-05-31")))
+        );
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/shifts")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.isArray()).isTrue();
+        assertThat(body).isNotEmpty();
+        for (String field : List.of("id", "employeeFullName", "employeeType", "shift", "startDate", "endDate")) {
+            assertThat(body.get(0).has(field)).isTrue();
+        }
     }
 
     private ResponseEntity<String> postJson(String path, String body) {

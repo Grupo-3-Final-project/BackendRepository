@@ -1,6 +1,7 @@
 package com.parque.shift;
 
 import com.parque.employee.dto.EmployeeCreateRequest;
+import com.parque.employee.model.Employee;
 import com.parque.employee.repository.EmployeeRepository;
 import com.parque.employee.service.EmployeeService;
 import com.parque.exception.ConflictException;
@@ -68,6 +69,33 @@ class ShiftServiceTest {
         assertThat(shifts).isNotEmpty();
         Set<LocalDate> startDates = shifts.stream().map(Shift::getStartDate).collect(java.util.stream.Collectors.toSet());
         assertThat(startDates).contains(LocalDate.parse("2026-05-01"), LocalDate.parse("2026-05-16"), LocalDate.parse("2026-05-31"));
+    }
+
+    @Test
+    void getAll_shouldMapEmployeeDataIntoResponse() {
+        var employee = employeeRepository.save(Employee.builder()
+                .firstName("Mario")
+                .lastName("Ruiz")
+                .dni("99999999Z")
+                .email("mario.ruiz@example.com")
+                .employeeType("TECHNICIAN")
+                .shift("MORNING")
+                .active(true)
+                .build());
+
+        shiftRepository.save(Shift.builder()
+                .employee(employee)
+                .shift("AFTERNOON")
+                .startDate(LocalDate.parse("2026-05-01"))
+                .endDate(LocalDate.parse("2026-05-15"))
+                .build());
+
+        var response = shiftService.getAll();
+
+        assertThat(response).hasSize(1);
+        assertThat(response.getFirst().employeeFullName()).isEqualTo("Mario Ruiz");
+        assertThat(response.getFirst().employeeType()).isEqualTo("TECHNICIAN");
+        assertThat(response.getFirst().shift()).isEqualTo("AFTERNOON");
     }
 }
 

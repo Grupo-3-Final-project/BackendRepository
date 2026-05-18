@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -228,6 +229,57 @@ class AttractionControllerIT {
         assertThat(body.get("error").asText()).isEqualTo("Not Found");
         assertThat(body.get("message").asText()).isEqualTo("Resource not found");
         assertThat(body.get("path").asText()).isEqualTo("/api/v1/attractions");
+    }
+
+    @Test
+    void getAttraction_shouldReturn200_whenAttractionExists() throws Exception {
+        AttractionCreateRequest request = new AttractionCreateRequest(
+                "Dragon Coaster",
+                "Montana rusa principal del parque.",
+                "LARGE",
+                "OPEN",
+                32,
+                32,
+                "https://example.com/attraction.jpg"
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/attractions", objectMapper.writeValueAsString(request));
+        long id = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/attractions/" + id)
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("id").asLong()).isEqualTo(id);
+        assertThat(body.get("name").asText()).isEqualTo("Dragon Coaster");
+    }
+
+    @Test
+    void deleteAttraction_shouldReturn204_whenAttractionExists() throws Exception {
+        AttractionCreateRequest request = new AttractionCreateRequest(
+                "Dragon Coaster",
+                "Montana rusa principal del parque.",
+                "LARGE",
+                "OPEN",
+                32,
+                32,
+                "https://example.com/attraction.jpg"
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/attractions", objectMapper.writeValueAsString(request));
+        long id = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        ResponseEntity<String> response = restClient()
+                .method(HttpMethod.DELETE)
+                .uri("/api/attractions/" + id)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(attractionRepository.findById(id)).isEmpty();
     }
 
     private ResponseEntity<String> postJson(String path, String body) {

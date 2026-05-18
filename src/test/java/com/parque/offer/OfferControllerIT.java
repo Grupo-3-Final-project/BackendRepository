@@ -230,6 +230,32 @@ class OfferControllerIT {
     }
 
     @Test
+    void getOffer_shouldReturn200_whenOfferExists() throws Exception {
+        OfferCreateRequest request = new OfferCreateRequest(
+                "Oferta Familiar Magic Park",
+                "Hotel + entradas para 2 adultos y 2 ninos.",
+                hotelId,
+                "FULL_BOARD",
+                4,
+                new BigDecimal("399.99"),
+                "https://example.com/offer.jpg"
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/offers", objectMapper.writeValueAsString(request));
+        long offerId = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/offers/" + offerId)
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("id").asLong()).isEqualTo(offerId);
+        assertThat(body.get("title").asText()).isEqualTo("Oferta Familiar Magic Park");
+    }
+
+    @Test
     void postOffers_shouldReturn400WithApiError_whenInvalidBody() throws Exception {
         String invalidBody = """
                 {

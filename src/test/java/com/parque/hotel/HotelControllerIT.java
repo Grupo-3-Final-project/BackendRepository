@@ -232,6 +232,61 @@ class HotelControllerIT {
         assertThat(body.get("message").asText()).isEqualTo("Hotel not found");
     }
 
+    @Test
+    void getHotel_shouldReturn200_whenHotelExists() throws Exception {
+        HotelCreateRequest request = new HotelCreateRequest(
+                "Hotel Magic Park",
+                "Hotel familiar situado junto al parque.",
+                120,
+                120,
+                240,
+                240,
+                new BigDecimal("80.0"),
+                new BigDecimal("120.0"),
+                "https://example.com/hotel.jpg"
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/hotels", objectMapper.writeValueAsString(request));
+        long id = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/hotels/" + id)
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("id").asLong()).isEqualTo(id);
+        assertThat(body.get("name").asText()).isEqualTo("Hotel Magic Park");
+    }
+
+    @Test
+    void deleteHotel_shouldReturn204_whenHotelExists() throws Exception {
+        HotelCreateRequest request = new HotelCreateRequest(
+                "Hotel Magic Park",
+                "Hotel familiar situado junto al parque.",
+                120,
+                120,
+                240,
+                240,
+                new BigDecimal("80.0"),
+                new BigDecimal("120.0"),
+                "https://example.com/hotel.jpg"
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/hotels", objectMapper.writeValueAsString(request));
+        long id = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        ResponseEntity<String> response = restClient()
+                .method(HttpMethod.DELETE)
+                .uri("/api/hotels/" + id)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(hotelRepository.findById(id)).isEmpty();
+    }
+
     private ResponseEntity<String> postJson(String path, String body) {
         HttpHeaders headers = new HttpHeaders();
         headers.add(HttpHeaders.CONTENT_TYPE, "application/json");

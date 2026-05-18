@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -245,6 +246,58 @@ class EmployeeControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         JsonNode body = objectMapper.readTree(response.getBody());
         assertThat(body.get("message").asText()).isEqualTo("Employee not found");
+    }
+
+    @Test
+    void getEmployee_shouldReturn200_whenEmployeeExists() throws Exception {
+        EmployeeCreateRequest request = new EmployeeCreateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/employees", objectMapper.writeValueAsString(request));
+        long id = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/employees/" + id)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("id").asLong()).isEqualTo(id);
+        assertThat(body.get("email").asText()).isEqualTo("laura@example.com");
+    }
+
+    @Test
+    void deleteEmployee_shouldReturn204_whenEmployeeExists() throws Exception {
+        EmployeeCreateRequest request = new EmployeeCreateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        );
+        ResponseEntity<String> createdResponse = postJson("/api/employees", objectMapper.writeValueAsString(request));
+        long id = objectMapper.readTree(createdResponse.getBody()).get("id").asLong();
+
+        ResponseEntity<String> response = restClient()
+                .method(HttpMethod.DELETE)
+                .uri("/api/employees/" + id)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(employeeRepository.findById(id)).isEmpty();
     }
 
     private ResponseEntity<String> postJson(String path, String body) {

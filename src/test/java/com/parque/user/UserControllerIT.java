@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.parque.testconfig.JacksonTestConfig;
 import com.parque.testsupport.InternalAuthSupport;
 import com.parque.user.dto.UserCreateRequest;
+import com.parque.user.dto.UserUpdateRequest;
 import com.parque.user.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -163,6 +165,135 @@ class UserControllerIT {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         JsonNode body = objectMapper.readTree(response.getBody());
         assertThat(body.get("message").asText()).isEqualTo("User not found");
+    }
+
+    @Test
+    void getUsers_shouldReturnExistingUsers() throws Exception {
+        postJson("/api/users", objectMapper.writeValueAsString(new UserCreateRequest(
+                "David",
+                "Navarro",
+                "12345678A",
+                "david@example.com",
+                "600123123",
+                LocalDate.parse("1990-04-15")
+        )));
+        postJson("/api/users", objectMapper.writeValueAsString(new UserCreateRequest(
+                "Ana",
+                "Garcia",
+                "87654321B",
+                "ana@example.com",
+                "600000000",
+                LocalDate.parse("1995-01-01")
+        )));
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/users")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body).hasSize(2);
+    }
+
+    @Test
+    void getUserById_shouldReturnExistingUser() throws Exception {
+        postJson("/api/users", objectMapper.writeValueAsString(new UserCreateRequest(
+                "David",
+                "Navarro",
+                "12345678A",
+                "david@example.com",
+                "600123123",
+                LocalDate.parse("1990-04-15")
+        )));
+        Long userId = userRepository.findAll().stream()
+                .max(Comparator.comparing(user -> user.getId()))
+                .orElseThrow()
+                .getId();
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/users/" + userId)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("id").asLong()).isEqualTo(userId);
+        assertThat(body.get("email").asText()).isEqualTo("david@example.com");
+    }
+
+    @Test
+    void putUser_shouldReturnUpdatedUser() throws Exception {
+        postJson("/api/users", objectMapper.writeValueAsString(new UserCreateRequest(
+                "David",
+                "Navarro",
+                "12345678A",
+                "david@example.com",
+                "600123123",
+                LocalDate.parse("1990-04-15")
+        )));
+        Long userId = userRepository.findAll().stream()
+                .max(Comparator.comparing(user -> user.getId()))
+                .orElseThrow()
+                .getId();
+
+        UserUpdateRequest request = new UserUpdateRequest(
+                "David Updated",
+                "Navarro Updated",
+                "11111111C",
+                "updated@example.com",
+                "622333444",
+                LocalDate.parse("1991-05-20")
+        );
+
+        ResponseEntity<String> response = restClient()
+                .method(HttpMethod.PUT)
+                .uri("/api/users/" + userId)
+                .headers(httpHeaders -> {
+                    httpHeaders.setBearerAuth(authToken());
+                    httpHeaders.add(HttpHeaders.CONTENT_TYPE, "application/json");
+                })
+                .body(objectMapper.writeValueAsString(request))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.get("firstName").asText()).isEqualTo("David Updated");
+        assertThat(body.get("lastName").asText()).isEqualTo("Navarro Updated");
+        assertThat(body.get("phone").asText()).isEqualTo("622333444");
+        assertThat(body.get("email").asText()).isEqualTo("updated@example.com");
+        assertThat(body.get("birthDate").asText()).isEqualTo("1991-05-20");
+    }
+
+    @Test
+    void deleteUser_shouldReturn204_whenUserExists() throws Exception {
+        postJson("/api/users", objectMapper.writeValueAsString(new UserCreateRequest(
+                "David",
+                "Navarro",
+                "12345678A",
+                "david@example.com",
+                "600123123",
+                LocalDate.parse("1990-04-15")
+        )));
+        Long userId = userRepository.findAll().stream()
+                .max(Comparator.comparing(user -> user.getId()))
+                .orElseThrow()
+                .getId();
+
+        ResponseEntity<String> response = restClient()
+                .method(HttpMethod.DELETE)
+                .uri("/api/users/" + userId)
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
+        assertThat(userRepository.findById(userId)).isEmpty();
     }
 
     private ResponseEntity<String> postJson(String path, String body) {

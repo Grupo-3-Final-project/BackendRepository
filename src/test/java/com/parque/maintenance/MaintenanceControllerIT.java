@@ -28,6 +28,7 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.client.RestClient;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -87,6 +88,31 @@ class MaintenanceControllerIT {
         JsonNode body = objectMapper.readTree(created.getBody());
         assertThat(body.get("message").asText()).isEqualTo("Maintenance schedule generated successfully");
         assertThat(body.get("totalMaintenanceTasks").asInt()).isGreaterThan(0);
+    }
+
+    @Test
+    void getMaintenance_shouldReturn200AndGeneratedTasks() throws Exception {
+        attractionService.create(new AttractionCreateRequest("A", "D", "LARGE", "OPEN", 10, 10, "https://example.com/a.jpg"));
+        employeeService.create(new EmployeeCreateRequest("T", "T", "87654321B", "t@example.com", "TECHNICIAN", "MORNING", true));
+        postJson(
+                "/api/maintenance/generate",
+                objectMapper.writeValueAsString(new MaintenanceGenerateRequest(LocalDate.parse("2026-05-01"), LocalDate.parse("2026-05-31")))
+        );
+
+        ResponseEntity<String> response = restClient()
+                .get()
+                .uri("/api/maintenance")
+                .headers(httpHeaders -> httpHeaders.setBearerAuth(authToken()))
+                .retrieve()
+                .toEntity(String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        JsonNode body = objectMapper.readTree(response.getBody());
+        assertThat(body.isArray()).isTrue();
+        assertThat(body).isNotEmpty();
+        for (String field : List.of("id", "attractionName", "scheduledDate", "status", "technicians")) {
+            assertThat(body.get(0).has(field)).isTrue();
+        }
     }
 
     private ResponseEntity<String> postJson(String path, String body) {
