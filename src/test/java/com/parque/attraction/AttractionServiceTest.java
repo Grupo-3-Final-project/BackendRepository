@@ -49,6 +49,75 @@ class AttractionServiceTest {
     }
 
     @Test
+    void create_shouldCalculateMaintenanceFrequencyForSmallAndNormalizeValues() {
+        AttractionResponse created = attractionService.create(new AttractionCreateRequest(
+                "Pasaje del Olvido",
+                "Recorrido inmersivo.",
+                " small ",
+                " maintenance ",
+                18,
+                8,
+                "https://example.com/pasaje.jpg"
+        ));
+
+        assertThat(created.size()).isEqualTo("SMALL");
+        assertThat(created.status()).isEqualTo("MAINTENANCE");
+        assertThat(created.maintenanceFrequencyDays()).isEqualTo(30);
+    }
+
+    @Test
+    void update_shouldKeepDefaultMaintenanceFrequencyForMediumAttractions() {
+        AttractionResponse created = attractionService.create(new AttractionCreateRequest(
+                "Laberinto",
+                "Atraccion original.",
+                "LARGE",
+                "OPEN",
+                20,
+                20,
+                "https://example.com/laberinto.jpg"
+        ));
+
+        AttractionResponse updated = attractionService.update(created.id(), new AttractionUpdateRequest(
+                "Laberinto Oscuro",
+                "Atraccion actualizada.",
+                " medium ",
+                " closed ",
+                24,
+                0,
+                "https://example.com/laberinto-2.jpg"
+        ));
+
+        assertThat(updated.name()).isEqualTo("Laberinto Oscuro");
+        assertThat(updated.size()).isEqualTo("MEDIUM");
+        assertThat(updated.status()).isEqualTo("CLOSED");
+        assertThat(updated.maintenanceFrequencyDays()).isEqualTo(14);
+        assertThat(updated.availableSeats()).isZero();
+    }
+
+    @Test
+    void getAllAndDelete_shouldReturnCreatedAttractionAndThenRemoveIt() {
+        AttractionResponse created = attractionService.create(new AttractionCreateRequest(
+                "Dragon Coaster",
+                "Montana rusa principal del parque.",
+                "LARGE",
+                "OPEN",
+                32,
+                32,
+                "https://example.com/attraction.jpg"
+        ));
+
+        assertThat(attractionService.getAll()).extracting(AttractionResponse::id).contains(created.id());
+        assertThat(attractionService.getById(created.id()).name()).isEqualTo("Dragon Coaster");
+
+        attractionService.delete(created.id());
+
+        assertThat(attractionService.getAll()).isEmpty();
+        assertThatThrownBy(() -> attractionService.getById(created.id()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Attraction not found");
+    }
+
+    @Test
     void update_shouldThrowNotFound_whenAttractionDoesNotExist() {
         AttractionUpdateRequest request = new AttractionUpdateRequest(
                 "Dragon Coaster",

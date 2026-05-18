@@ -74,6 +74,144 @@ class EmployeeServiceTest {
     }
 
     @Test
+    void create_shouldThrowConflict_whenDniExists() {
+        employeeService.create(new EmployeeCreateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        ));
+
+        assertThatThrownBy(() -> employeeService.create(new EmployeeCreateRequest(
+                "Ana",
+                "Garcia",
+                "87654321B",
+                "ana@example.com",
+                "CLEANER",
+                "AFTERNOON",
+                true
+        ))).isInstanceOf(ConflictException.class).hasMessage("DNI already exists");
+    }
+
+    @Test
+    void update_shouldNormalizeFieldsAndPersistChanges() {
+        EmployeeResponse created = employeeService.create(new EmployeeCreateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        ));
+
+        EmployeeResponse updated = employeeService.update(created.id(), new EmployeeUpdateRequest(
+                "Laura",
+                "Gomez Perez",
+                "87654321B",
+                "laura@example.com",
+                " cleaner ",
+                " afternoon ",
+                false
+        ));
+
+        assertThat(updated.lastName()).isEqualTo("Gomez Perez");
+        assertThat(updated.employeeType()).isEqualTo("CLEANER");
+        assertThat(updated.shift()).isEqualTo("AFTERNOON");
+        assertThat(updated.active()).isFalse();
+        assertThat(employeeService.getById(created.id()).shift()).isEqualTo("AFTERNOON");
+    }
+
+    @Test
+    void update_shouldThrowConflict_whenEmailBelongsToAnotherEmployee() {
+        EmployeeResponse first = employeeService.create(new EmployeeCreateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        ));
+        employeeService.create(new EmployeeCreateRequest(
+                "Ana",
+                "Garcia",
+                "12345678A",
+                "ana@example.com",
+                "CLEANER",
+                "AFTERNOON",
+                true
+        ));
+
+        assertThatThrownBy(() -> employeeService.update(first.id(), new EmployeeUpdateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "ana@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        ))).isInstanceOf(ConflictException.class).hasMessage("Email already exists");
+    }
+
+    @Test
+    void update_shouldThrowConflict_whenDniBelongsToAnotherEmployee() {
+        EmployeeResponse first = employeeService.create(new EmployeeCreateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        ));
+        employeeService.create(new EmployeeCreateRequest(
+                "Ana",
+                "Garcia",
+                "12345678A",
+                "ana@example.com",
+                "CLEANER",
+                "AFTERNOON",
+                true
+        ));
+
+        assertThatThrownBy(() -> employeeService.update(first.id(), new EmployeeUpdateRequest(
+                "Laura",
+                "Gomez",
+                "12345678A",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        ))).isInstanceOf(ConflictException.class).hasMessage("DNI already exists");
+    }
+
+    @Test
+    void getAllAndDelete_shouldReflectCurrentEmployees() {
+        EmployeeResponse created = employeeService.create(new EmployeeCreateRequest(
+                "Laura",
+                "Gomez",
+                "87654321B",
+                "laura@example.com",
+                "TECHNICIAN",
+                "MORNING",
+                true
+        ));
+
+        assertThat(employeeService.getAll()).extracting(EmployeeResponse::id).contains(created.id());
+
+        employeeService.delete(created.id());
+
+        assertThat(employeeService.getAll()).isEmpty();
+        assertThatThrownBy(() -> employeeService.getById(created.id()))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Employee not found");
+    }
+
+    @Test
     void update_shouldThrowNotFound_whenEmployeeDoesNotExist() {
         EmployeeUpdateRequest request = new EmployeeUpdateRequest(
                 "Laura",
