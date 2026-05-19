@@ -69,13 +69,15 @@ public class DemoDataConfig {
             Hotel magicPark = syncHotel(hotelRepository, demoMagicParkHotel());
             Hotel adventure = syncHotel(hotelRepository, demoAdventureHotel());
             Hotel fantasy = syncHotel(hotelRepository, demoFantasyHotel());
+            Hotel puertaNegra = hotelRepository.findByName("Hotel Puerta Negra").orElse(magicPark);
+            Hotel mansionCarmesi = hotelRepository.findByName("Hotel Mansión Carmesí").orElse(adventure);
 
             syncAttraction(attractionRepository, demoDragonCoasterAttraction());
             syncAttraction(attractionRepository, demoSplashRiverAttraction());
             syncAttraction(attractionRepository, demoFantasyCarouselAttraction());
 
-            syncOffer(offerRepository, bookingRepository, demoMagicParkOffer(magicPark));
-            syncOffer(offerRepository, bookingRepository, demoAdventureOffer(adventure));
+            syncOffer(offerRepository, bookingRepository, demoMagicParkOffer(puertaNegra));
+            syncOffer(offerRepository, bookingRepository, demoAdventureOffer(mansionCarmesi));
 
             if (userRepository.count() > 0 || bookingRepository.count() > 0 || employeeRepository.count() > 0) {
                 return;
@@ -357,25 +359,25 @@ public class DemoDataConfig {
 
     private Offer demoMagicParkOffer(Hotel hotel) {
         return Offer.builder()
-                .title("Escapada Familiar Magic Park")
-                .description("Hotel + entradas para una escapada de fin de semana.")
+                .title("Pack Familiar Puerta Negra")
+                .description("Hotel + entradas familiares para cruzar la puerta con una estancia completa junto al parque.")
                 .hotel(hotel)
                 .boardType("FULL_BOARD")
                 .includedTickets(4)
                 .totalPrice(new BigDecimal("399.99"))
-                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerHotelTicket_d8hvg3.png")
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778758628/offers/Pack_Familiar_Puerta_Negra_ivhhzf.png")
                 .build();
     }
 
     private Offer demoAdventureOffer(Hotel hotel) {
         return Offer.builder()
-                .title("Oferta Aventura")
-                .description("Hotel + entradas para dos adultos y un nino.")
+                .title("Pack Noche Carmesí")
+                .description("Escapada temática con hotel, entradas y ambiente nocturno para vivir el parque al caer la noche.")
                 .hotel(hotel)
                 .boardType("HALF_BOARD")
-                .includedTickets(3)
+                .includedTickets(2)
                 .totalPrice(new BigDecimal("249.99"))
-                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778494828/offers/offerFamilyPack_tzegmw.png")
+                .imageUrl("https://res.cloudinary.com/dp3qqp2ns/image/upload/v1778756951/offers/Pack_Noche_Carmes%C3%AD_cpmqkz.png")
                 .build();
     }
 
