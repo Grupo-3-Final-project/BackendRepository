@@ -185,13 +185,13 @@ class DemoDataConfigTest {
                 .build();
         Offer canonicalOffer = Offer.builder()
                 .id(28L)
-                .title("Escapada Familiar Magic Park")
+                .title("Pack Familiar Puerta Negra")
                 .description("Old")
                 .imageUrl("https://old.example/offer.png")
                 .build();
         Offer duplicatedOffer = Offer.builder()
                 .id(29L)
-                .title("Escapada familiar magic park!!!")
+                .title("Pack familiar puerta negra!!!")
                 .description("Old duplicate")
                 .imageUrl("https://other.example/offer.png")
                 .build();
