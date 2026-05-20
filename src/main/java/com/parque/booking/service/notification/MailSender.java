@@ -21,18 +21,18 @@ public class MailSender {
     private final JavaMailSender javaMailSender;
     private final String from;
 
-    public MailSender(JavaMailSender javaMailSender, @Value("${spring.mail.username:}") String from) {
+    public MailSender(JavaMailSender javaMailSender, @Value("${app.mail.from:${spring.mail.username:}}") String from) {
         this.javaMailSender = javaMailSender;
         this.from = from;
     }
 
-    public boolean sendEmail(String to, String subject, String htmlBody, Map<String, byte[]> inlineImages) {
+    public boolean sendEmail(String to, String subject, String textBody, String htmlBody, Map<String, byte[]> inlineImages) {
         try {
             var message = javaMailSender.createMimeMessage();
             var helper = new MimeMessageHelper(message, true, "UTF-8");
             helper.setTo(to);
             helper.setSubject(subject);
-            helper.setText(htmlBody, true);
+            helper.setText(textBody, htmlBody);
 
             if (from != null && !from.isBlank()) {
                 helper.setFrom(from);
