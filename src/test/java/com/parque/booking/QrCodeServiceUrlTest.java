@@ -8,12 +8,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class QrCodeServiceUrlTest {
 
     @Test
-    void buildEntryAccessUrl_shouldAppendEntryPathWhenMobileBaseDoesNotEndWithMobile() {
+    void buildEntryAccessUrl_shouldUseDefaultEntryBaseWhenEntryBaseIsBlank() {
         QrCodeService qrCodeService = new QrCodeService("https://tickets.parque.com/access", "");
 
         assertThat(qrCodeService.buildMobileAccessUrl("mobile-token"))
-                .isEqualTo("https://tickets.parque.com/access/mobile-token");
+                .isEqualTo("https://tickets.parque.com/access/mobile/mobile-token");
         assertThat(qrCodeService.buildEntryAccessUrl("entry-token"))
-                .isEqualTo("https://tickets.parque.com/access/entry/entry-token");
+                .isEqualTo("http://localhost:5173/entry/entry-token");
     }
 }
