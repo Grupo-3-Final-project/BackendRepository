@@ -23,7 +23,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -219,24 +218,6 @@ class BookingServiceImplUnitTest {
             assertThat(summary.totalPrice()).isEqualByComparingTo("65.00");
             assertThat(summary.createdAt()).isEqualTo(LocalDateTime.of(2026, 5, 18, 10, 15, 30));
         });
-    }
-
-    @Test
-    void addParticipantsToBok_shouldAppendEmails() {
-        Booking booking = Booking.builder()
-                .emailsParticipants(new ArrayList<>(List.of("uno@example.com")))
-                .build();
-
-        ArrayList<String> result = bookingService.AddParticipantsToBok(
-                new ArrayList<>(List.of("dos@example.com", "tres@example.com")),
-                booking
-        );
-
-        assertThat(result).containsExactly(
-                "uno@example.com",
-                "dos@example.com",
-                "tres@example.com"
-        );
     }
 
     private User buildUser(Long id, String email) {

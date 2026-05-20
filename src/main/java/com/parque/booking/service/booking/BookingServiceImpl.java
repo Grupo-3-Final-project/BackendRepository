@@ -25,7 +25,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -73,24 +72,13 @@ public class BookingServiceImpl implements BookingService {
             validateHotelAvailability(hotel, companions.size());
         }
 
-        Booking booking = Booking.builder()
-                .user(user)
-                .offer(offer)
-                .hotel(hotel)
-                .boardType(boardType)
-                .visitDate(request.visitDate())
-                .emailSent(Boolean.FALSE)
-                .build();
-
-        List<Ticket> tickets = companions.stream()
-                .map(companion -> toTicket(booking, companion, request.visitDate(), boardType))
-                .toList();
-
+        Booking booking = buildBooking(user, offer, hotel, boardType, request.visitDate());
+        List<Ticket> tickets = buildTickets(booking, companions, request.visitDate(), boardType);
         booking.setTickets(tickets);
         booking.setTotalPrice(calculateTotalPrice(tickets, hotel, boardType));
 
         if (hotel != null) {
-            hotel.setAvailablePlaces(hotel.getAvailablePlaces() - companions.size());
+            reserveHotelPlaces(hotel, companions.size());
         }
 
         Booking saved = bookingRepository.saveAndFlush(booking);
@@ -119,15 +107,19 @@ public class BookingServiceImpl implements BookingService {
             throw new IllegalArgumentException("Invalid booking data");
         }
 
+        if (hasMinorWithoutAdult(companions, visitDate)) {
+            throw new ConflictException("A minor cannot travel without an adult");
+        }
+    }
+
+    private boolean hasMinorWithoutAdult(List<CompanionRequest> companions, LocalDate visitDate) {
         boolean hasAdult = companions.stream()
                 .anyMatch(companion -> ageAtVisit(companion.birthDate(), visitDate) >= ADULT_AGE);
 
         boolean hasMinor = companions.stream()
                 .anyMatch(companion -> ageAtVisit(companion.birthDate(), visitDate) < ADULT_AGE);
 
-        if (hasMinor && !hasAdult) {
-            throw new ConflictException("A minor cannot travel without an adult");
-        }
+        return hasMinor && !hasAdult;
     }
 
     private Offer resolveOffer(Long offerId) {
@@ -153,6 +145,32 @@ public class BookingServiceImpl implements BookingService {
         if (hotel.getAvailablePlaces() == null || hotel.getAvailablePlaces() < requiredPlaces) {
             throw new ConflictException("Hotel is full");
         }
+    }
+
+    private Booking buildBooking(User user, Offer offer, Hotel hotel, String boardType, LocalDate visitDate) {
+        return Booking.builder()
+                .user(user)
+                .offer(offer)
+                .hotel(hotel)
+                .boardType(boardType)
+                .visitDate(visitDate)
+                .emailSent(Boolean.FALSE)
+                .build();
+    }
+
+    private List<Ticket> buildTickets(
+            Booking booking,
+            List<CompanionRequest> companions,
+            LocalDate visitDate,
+            String boardType
+    ) {
+        return companions.stream()
+                .map(companion -> toTicket(booking, companion, visitDate, boardType))
+                .toList();
+    }
+
+    private void reserveHotelPlaces(Hotel hotel, int requiredPlaces) {
+        hotel.setAvailablePlaces(hotel.getAvailablePlaces() - requiredPlaces);
     }
 
     private Ticket toTicket(Booking booking, CompanionRequest companion, LocalDate visitDate, String boardType) {
@@ -244,15 +262,6 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private BookingResponse toResponse(Booking booking) {
-        List<TicketResponse> tickets = booking.getTickets() == null
-                ? List.of()
-                : booking.getTickets().stream()
-                .map(ticket -> new TicketResponse(
-                        ticket.getHolderFullName(),
-                        ticket.getAgeRange(),
-                        ticket.getPrice()))
-                .toList();
-
         return new BookingResponse(
                 booking.getId(),
                 booking.getUser().getId(),
@@ -261,11 +270,24 @@ public class BookingServiceImpl implements BookingService {
                 booking.getHotel() == null ? null : booking.getHotel().getName(),
                 booking.getBoardType(),
                 booking.getVisitDate(),
-                tickets,
+                toTicketResponses(booking.getTickets()),
                 booking.getTotalPrice(),
                 booking.getEmailSent(),
                 normalizeCreatedAt(booking.getCreatedAt())
         );
+    }
+
+    private List<TicketResponse> toTicketResponses(List<Ticket> tickets) {
+        if (tickets == null) {
+            return List.of();
+        }
+
+        return tickets.stream()
+                .map(ticket -> new TicketResponse(
+                        ticket.getHolderFullName(),
+                        ticket.getAgeRange(),
+                        ticket.getPrice()))
+                .toList();
     }
 
     private LocalDateTime normalizeCreatedAt(LocalDateTime createdAt) {
@@ -288,10 +310,5 @@ public class BookingServiceImpl implements BookingService {
 
     private String generateToken() {
         return UUID.randomUUID().toString().replace("-", "");
-    }
-
-    public ArrayList<String> AddParticipantsToBok(ArrayList<String> emailsParticipants, Booking book) {
-        book.getEmailsParticipants().addAll(emailsParticipants);
-        return book.getEmailsParticipants();
     }
 }
