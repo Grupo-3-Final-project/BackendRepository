@@ -41,6 +41,7 @@ class MailSenderTest {
         boolean sent = mailSender.sendEmail(
                 "cliente@example.com",
                 "Reserva",
+                "ok",
                 "<html><body>ok</body></html>",
                 Map.of("entry-1", new byte[]{1, 2, 3})
         );
@@ -65,6 +66,7 @@ class MailSenderTest {
         boolean sent = mailSender.sendEmail(
                 "cliente@example.com",
                 "Reserva",
+                "ok",
                 "<html><body>ok</body></html>",
                 Map.of()
         );

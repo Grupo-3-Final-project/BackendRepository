@@ -61,9 +61,9 @@ class NotificationServiceTest {
         when(qrCodeService.generateQrCode("https://mobile/mobile-1")).thenReturn(new byte[]{2});
         when(qrCodeService.generateQrCode("https://entry/entry-2")).thenReturn(new byte[]{3});
         when(qrCodeService.generateQrCode("https://mobile/mobile-2")).thenReturn(new byte[]{4});
-        when(mailSender.sendEmail(eq("ana@example.com"), eq("Confirmacion de reserva - La Ultima Puerta"), org.mockito.ArgumentMatchers.contains("Confirmacion de reserva"), anyMap()))
+        when(mailSender.sendEmail(eq("ana@example.com"), eq("Confirmacion de reserva - La Ultima Puerta"), org.mockito.ArgumentMatchers.contains("Confirmacion de reserva"), org.mockito.ArgumentMatchers.contains("Confirmacion de reserva"), anyMap()))
                 .thenReturn(true);
-        when(mailSender.sendEmail(eq("luis@example.com"), eq("Confirmacion de reserva - La Ultima Puerta"), org.mockito.ArgumentMatchers.contains("Confirmacion de reserva"), anyMap()))
+        when(mailSender.sendEmail(eq("luis@example.com"), eq("Confirmacion de reserva - La Ultima Puerta"), org.mockito.ArgumentMatchers.contains("Confirmacion de reserva"), org.mockito.ArgumentMatchers.contains("Confirmacion de reserva"), anyMap()))
                 .thenReturn(true);
 
         boolean sent = notificationService.sendBookingConfirmation(
@@ -73,12 +73,21 @@ class NotificationServiceTest {
 
         assertThat(sent).isTrue();
 
-        ArgumentCaptor<String> bodyCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> textBodyCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> htmlBodyCaptor = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<Map<String, byte[]>> imagesCaptor = ArgumentCaptor.forClass(Map.class);
 
-        verify(mailSender).sendEmail(eq("ana@example.com"), eq("Confirmacion de reserva - La Ultima Puerta"), bodyCaptor.capture(), imagesCaptor.capture());
+        verify(mailSender).sendEmail(eq("ana@example.com"), eq("Confirmacion de reserva - La Ultima Puerta"), textBodyCaptor.capture(), htmlBodyCaptor.capture(), imagesCaptor.capture());
 
-        assertThat(bodyCaptor.getValue())
+        assertThat(textBodyCaptor.getValue())
+                .contains("Reserva: #25")
+                .contains("Hotel: Hotel Umbral Nocturno")
+                .contains("Fecha de visita: 2026-05-22")
+                .contains("Ana Garcia")
+                .contains("https://entry/entry-1")
+                .contains("https://mobile/mobile-2");
+
+        assertThat(htmlBodyCaptor.getValue())
                 .contains("Reserva:</strong> #25")
                 .contains("Hotel Umbral Nocturno")
                 .contains("Ana Garcia")

@@ -19,17 +19,17 @@ import java.util.Map;
 public class QrCodeService {
 
     private static final int QR_SIZE = 220;
-    private static final String DEFAULT_MOBILE_BASE_URL = "http://localhost:5173/mobile";
+    private static final String DEFAULT_BASE_URL = "http://localhost:5173";
 
     private final String mobileBaseUrl;
     private final String entryBaseUrl;
 
     public QrCodeService(
-            @Value("${app.mobile-base-url:http://localhost:5173/mobile}") String mobileBaseUrl,
-            @Value("${app.entry-base-url:}") String entryBaseUrl
+            @Value("${app.urls.base-mobile:http://localhost:5173}") String baseMobileUrl,
+            @Value("${app.urls.base-entry:http://localhost:5173}") String baseEntryUrl
     ) {
-        this.mobileBaseUrl = normalizeBaseUrl(mobileBaseUrl, DEFAULT_MOBILE_BASE_URL);
-        this.entryBaseUrl = normalizeEntryBaseUrl(entryBaseUrl, this.mobileBaseUrl);
+        this.mobileBaseUrl = buildBaseUrl(baseMobileUrl, DEFAULT_BASE_URL, "mobile");
+        this.entryBaseUrl = buildBaseUrl(baseEntryUrl, DEFAULT_BASE_URL, "entry");
     }
 
     public byte[] generateQrCode(String content) {
@@ -55,22 +55,18 @@ public class QrCodeService {
         return mobileBaseUrl + "/" + mobileAccessToken;
     }
 
+    private String buildBaseUrl(String value, String fallbackValue, String path) {
+        String normalized = normalizeBaseUrl(value, fallbackValue);
+        if (normalized.endsWith("/" + path)) {
+            return normalized;
+        }
+        return normalized + "/" + path;
+    }
+
     private String normalizeBaseUrl(String value, String fallbackValue) {
         if (value == null || value.isBlank()) {
             return fallbackValue;
         }
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
-    }
-
-    private String normalizeEntryBaseUrl(String configuredEntryBaseUrl, String normalizedMobileBaseUrl) {
-        if (configuredEntryBaseUrl != null && !configuredEntryBaseUrl.isBlank()) {
-            return normalizeBaseUrl(configuredEntryBaseUrl, normalizedMobileBaseUrl + "/entry");
-        }
-
-        if (normalizedMobileBaseUrl.endsWith("/mobile")) {
-            return normalizedMobileBaseUrl.substring(0, normalizedMobileBaseUrl.length() - "/mobile".length()) + "/entry";
-        }
-
-        return normalizedMobileBaseUrl + "/entry";
     }
 }

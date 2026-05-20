@@ -9,7 +9,7 @@ class QrCodeServiceTest {
 
     @Test
     void generateQrCode_shouldCreatePngBytes() {
-        QrCodeService qrCodeService = new QrCodeService("http://localhost:5173/mobile", "");
+        QrCodeService qrCodeService = new QrCodeService("http://localhost:5173", "http://localhost:5173");
 
         byte[] qrCode = qrCodeService.generateQrCode("https://parque.test/mobile/token-1");
 
@@ -22,7 +22,7 @@ class QrCodeServiceTest {
 
     @Test
     void buildEntryAccessUrl_shouldDeriveEntryRouteFromMobileBaseUrl() {
-        QrCodeService qrCodeService = new QrCodeService("http://localhost:5173/mobile/", "");
+        QrCodeService qrCodeService = new QrCodeService("http://localhost:5173/", "http://localhost:5173/");
 
         assertThat(qrCodeService.buildEntryAccessUrl("entry-token")).isEqualTo("http://localhost:5173/entry/entry-token");
         assertThat(qrCodeService.buildMobileAccessUrl("mobile-token")).isEqualTo("http://localhost:5173/mobile/mobile-token");
@@ -31,8 +31,8 @@ class QrCodeServiceTest {
     @Test
     void buildEntryAccessUrl_shouldUseExplicitEntryBaseUrlWhenConfigured() {
         QrCodeService qrCodeService = new QrCodeService(
-                "http://localhost:5173/mobile",
-                "https://tickets.parque-atracciones.com/entry/"
+                "http://localhost:5173",
+                "https://tickets.parque-atracciones.com"
         );
 
         assertThat(qrCodeService.buildEntryAccessUrl("entry-token"))
